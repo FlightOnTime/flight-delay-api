@@ -1,19 +1,20 @@
 package com.flightontime.flightontime.api.dto.request;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 public class PredictionRequest {
 
     private String companhia;
-    private String origem;
-    private String destino;
-    private Date data_partida;
+    private String origem_aeroporto;
+    private String destino_aeroporto;
+    private LocalDateTime data_partida;
     private double distancia_km;
 
-    public PredictionRequest(String companhia, String origem, String destino, Date data_partida, double distancia_km) {
+    public PredictionRequest(String companhia, String origem, String destino, LocalDateTime data_partida, double distancia_km) {
         this.companhia = companhia;
-        this.origem = origem;
-        this.destino = destino;
+        this.origem_aeroporto = origem;
+        this.destino_aeroporto = destino;
         this.data_partida = data_partida;
         this.distancia_km = distancia_km;
     }
@@ -22,18 +23,17 @@ public class PredictionRequest {
         return companhia;
     }
 
-    public String getOrigem() {
-        return origem;
+    public String getOrigem_aeroporto() {
+        return origem_aeroporto;
     }
 
-    public String getDestino() {
-        return destino;
+    public String getDestino_aeroporto() {
+        return destino_aeroporto;
     }
 
-    public Date getData_partida() {
+    public LocalDateTime getData_partida() {
         return data_partida;
     }
-
     public double getDistancia_km() {
         return distancia_km;
     }
@@ -42,21 +42,22 @@ public class PredictionRequest {
         this.companhia = companhia;
     }
 
-    public void setOrigem(String origem) {
-        this.origem = origem;
+    public void setOrigem_aeroporto(String origem_aeroporto) {
+        this.origem_aeroporto = origem_aeroporto;
     }
 
-    public void setDestino(String destino) {
-        this.destino = destino;
+    public void setDestino_aeroporto(String destino_aeroporto) {
+        this.destino_aeroporto = destino_aeroporto;
     }
 
-    public void setData_partida(Date data_partida) {
+    public void setData_partida(LocalDateTime data_partida) {
         this.data_partida = data_partida;
     }
 
     public void setDistancia_km(double distancia_km) {
         this.distancia_km = distancia_km;
     }
+
 }
 
 

@@ -1,20 +1,14 @@
 package com.flightontime.flightontime.api.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PredictionResponse {
 
-    private String status;
+    private String previsao;
     private double probabilidade;
-
-    public PredictionResponse(String status, double probabilidade) {
-        this.status = status;
-        this.probabilidade = probabilidade;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public double getProbabilidade() {
-        return probabilidade;
-    }
 }

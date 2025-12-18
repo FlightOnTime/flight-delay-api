@@ -6,58 +6,58 @@ import java.time.LocalDateTime;
 public class PredictionRequest {
 
     private String companhia;
-    private String origem_aeroporto;
-    private String destino_aeroporto;
-    private LocalDateTime data_partida;
-    private double distancia_km;
+    private String origemAeroporto;
+    private String destinoAeroporto;
+    private LocalDateTime dataPartida;
+    private double distanciakm;
 
-    public PredictionRequest(String companhia, String origem, String destino, LocalDateTime data_partida, double distancia_km) {
+    public PredictionRequest(String companhia, String origemAeroporto, String destinoAeroporto, LocalDateTime dataPartida, double distanciakm) {
         this.companhia = companhia;
-        this.origem_aeroporto = origem;
-        this.destino_aeroporto = destino;
-        this.data_partida = data_partida;
-        this.distancia_km = distancia_km;
+        this.origemAeroporto = origemAeroporto;
+        this.destinoAeroporto = destinoAeroporto;
+        this.dataPartida = dataPartida;
+        this.distanciakm = distanciakm;
     }
 
     public String getCompanhia() {
         return companhia;
     }
 
-    public String getOrigem_aeroporto() {
-        return origem_aeroporto;
-    }
-
-    public String getDestino_aeroporto() {
-        return destino_aeroporto;
-    }
-
-    public LocalDateTime getData_partida() {
-        return data_partida;
-    }
-    public double getDistancia_km() {
-        return distancia_km;
-    }
-
     public void setCompanhia(String companhia) {
         this.companhia = companhia;
     }
 
-    public void setOrigem_aeroporto(String origem_aeroporto) {
-        this.origem_aeroporto = origem_aeroporto;
+    public String getOrigemAeroporto() {
+        return origemAeroporto;
     }
 
-    public void setDestino_aeroporto(String destino_aeroporto) {
-        this.destino_aeroporto = destino_aeroporto;
+    public void setOrigemAeroporto(String origemAeroporto) {
+        this.origemAeroporto = origemAeroporto;
     }
 
-    public void setData_partida(LocalDateTime data_partida) {
-        this.data_partida = data_partida;
+    public String getDestinoAeroporto() {
+        return destinoAeroporto;
     }
 
-    public void setDistancia_km(double distancia_km) {
-        this.distancia_km = distancia_km;
+    public void setDestinoAeroporto(String destinoAeroporto) {
+        this.destinoAeroporto = destinoAeroporto;
     }
 
+    public LocalDateTime getDataPartida() {
+        return dataPartida;
+    }
+
+    public void setDataPartida(LocalDateTime dataPartida) {
+        this.dataPartida = dataPartida;
+    }
+
+    public double getDistanciakm() {
+        return distanciakm;
+    }
+
+    public void setDistanciakm(double distanciakm) {
+        this.distanciakm = distanciakm;
+    }
 }
 
 

@@ -10,13 +10,43 @@ public class PredictionRequest {
     private String destinoAeroporto;
     private LocalDateTime dataPartida;
     private double distanciakm;
+    private double taxaAtrasoAeroporto;
+    private double taxaAtrasoCompanhia;
+    private double traficoAcumuladoAeroporto;
 
-    public PredictionRequest(String companhia, String origemAeroporto, String destinoAeroporto, LocalDateTime dataPartida, double distanciakm) {
+    public PredictionRequest(String companhia, String origemAeroporto, String destinoAeroporto, LocalDateTime dataPartida, double distanciakm, double taxaAtrasoAeroporto, double taxaAtrasoCompanhia, double traficoAcumuladoAeroporto) {
         this.companhia = companhia;
         this.origemAeroporto = origemAeroporto;
         this.destinoAeroporto = destinoAeroporto;
         this.dataPartida = dataPartida;
         this.distanciakm = distanciakm;
+        this.taxaAtrasoAeroporto = taxaAtrasoAeroporto;
+        this.taxaAtrasoCompanhia = taxaAtrasoCompanhia;
+        this.traficoAcumuladoAeroporto = traficoAcumuladoAeroporto;
+    }
+
+    public double getTaxaAtrasoAeroporto() {
+        return taxaAtrasoAeroporto;
+    }
+
+    public void setTaxaAtrasoAeroporto(double taxaAtrasoAeroporto) {
+        this.taxaAtrasoAeroporto = taxaAtrasoAeroporto;
+    }
+
+    public double getTaxaAtrasoCompanhia() {
+        return taxaAtrasoCompanhia;
+    }
+
+    public void setTaxaAtrasoCompanhia(double taxaAtrasoCompanhia) {
+        this.taxaAtrasoCompanhia = taxaAtrasoCompanhia;
+    }
+
+    public double getTraficoAcumuladoAeroporto() {
+        return traficoAcumuladoAeroporto;
+    }
+
+    public void setTraficoAcumuladoAeroporto(double traficoAcumuladoAeroporto) {
+        this.traficoAcumuladoAeroporto = traficoAcumuladoAeroporto;
     }
 
     public String getCompanhia() {

@@ -6,24 +6,26 @@ import lombok.Data;
 @Data
 public class FlightPredictionRequest {
 
-    @JsonProperty("Airline")
-    private String airline;
+    private String carrier;
 
-    @JsonProperty("Origin")
     private String origin;
 
-    @JsonProperty("Dest")
     private String dest;
 
-    @JsonProperty("Month")
-    private Integer month;
-
-    @JsonProperty("DayOfWeek")
+    @JsonProperty("day_of_week")
     private Integer dayOfWeek;
 
-    @JsonProperty("CRSDepTime")
+    @JsonProperty("crs_dep_time")
     private Integer crsDepTime;
 
-    @JsonProperty("Distance")
-    private Integer distance;
+    private Double distance;
+
+    @JsonProperty("origin_delay_rate")
+    private Double originDelayRate;
+
+    @JsonProperty("carrier_delay_rate")
+    private Double carrierDelayRate;
+
+    @JsonProperty("origin_traffic")
+    private Integer originTraffic;
 }

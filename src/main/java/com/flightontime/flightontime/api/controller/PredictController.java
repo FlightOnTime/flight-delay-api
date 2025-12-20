@@ -2,7 +2,7 @@ package com.flightontime.flightontime.api.controller;
 
 import com.flightontime.flightontime.api.dto.request.PredictionRequest;
 import com.flightontime.flightontime.domain.model.FlightPredictionResponse;
-import com.flightontime.flightontime.service.FlightPredictionService;
+import com.flightontime.flightontime.domain.service.FlightPredictionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

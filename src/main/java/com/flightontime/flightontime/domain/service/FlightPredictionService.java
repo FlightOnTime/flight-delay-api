@@ -1,4 +1,4 @@
-package com.flightontime.flightontime.service;
+package com.flightontime.flightontime.domain.service;
 
 import com.flightontime.flightontime.api.dto.request.PredictionRequest;
 import com.flightontime.flightontime.domain.model.FlightPredictionResponse;

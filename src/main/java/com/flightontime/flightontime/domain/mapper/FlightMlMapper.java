@@ -14,8 +14,8 @@ public class FlightMlMapper {
         FlightPredictionRequest ml = new FlightPredictionRequest();
 
         // PT -> EN
-        ml.setCarrier(dto.getCompanhia());
-        ml.setOrigin(dto.getOrigemAeroporto());
+        ml.setCarrier(dto.getCarrier());
+        ml.setOrigin(dto.getOrigin());
         ml.setDest(dto.getDestinoAeroporto());
 
         // data -> dayOfWeek (1=Mon ... 7=Sun)

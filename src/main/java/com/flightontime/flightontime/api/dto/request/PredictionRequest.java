@@ -1,94 +1,42 @@
 package com.flightontime.flightontime.api.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
-
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PredictionRequest {
 
-    private String companhia;
-    private String origemAeroporto;
-    private String destinoAeroporto;
-    private LocalDateTime dataPartida;
-    private double distanciakm;
-    private double taxaAtrasoAeroporto;
-    private double taxaAtrasoCompanhia;
-    private double traficoAcumuladoAeroporto;
+    @JsonProperty("carrier")
+    private String carrier;
 
-    public PredictionRequest(String companhia, String origemAeroporto, String destinoAeroporto, LocalDateTime dataPartida, double distanciakm, double taxaAtrasoAeroporto, double taxaAtrasoCompanhia, double traficoAcumuladoAeroporto) {
-        this.companhia = companhia;
-        this.origemAeroporto = origemAeroporto;
-        this.destinoAeroporto = destinoAeroporto;
-        this.dataPartida = dataPartida;
-        this.distanciakm = distanciakm;
-        this.taxaAtrasoAeroporto = taxaAtrasoAeroporto;
-        this.taxaAtrasoCompanhia = taxaAtrasoCompanhia;
-        this.traficoAcumuladoAeroporto = traficoAcumuladoAeroporto;
-    }
+    @JsonProperty("origin")
+    private String origin;
 
-    public double getTaxaAtrasoAeroporto() {
-        return taxaAtrasoAeroporto;
-    }
+    @JsonProperty("destination")
+    private String destination;
 
-    public void setTaxaAtrasoAeroporto(double taxaAtrasoAeroporto) {
-        this.taxaAtrasoAeroporto = taxaAtrasoAeroporto;
-    }
+    @JsonProperty("departure_date")
+    private LocalDateTime departureDate;
 
-    public double getTaxaAtrasoCompanhia() {
-        return taxaAtrasoCompanhia;
-    }
+    @JsonProperty("distance_miles")
+    private double distanceMiles;
 
-    public void setTaxaAtrasoCompanhia(double taxaAtrasoCompanhia) {
-        this.taxaAtrasoCompanhia = taxaAtrasoCompanhia;
-    }
+    @JsonProperty("airport_delay_rate")
+    private double airportDelayRate;
 
-    public double getTraficoAcumuladoAeroporto() {
-        return traficoAcumuladoAeroporto;
-    }
+    @JsonProperty("airline_delay_rate")
+    private double airlineDelayRate;
 
-    public void setTraficoAcumuladoAeroporto(double traficoAcumuladoAeroporto) {
-        this.traficoAcumuladoAeroporto = traficoAcumuladoAeroporto;
-    }
-
-    public String getCompanhia() {
-        return companhia;
-    }
-
-    public void setCompanhia(String companhia) {
-        this.companhia = companhia;
-    }
-
-    public String getOrigemAeroporto() {
-        return origemAeroporto;
-    }
-
-    public void setOrigemAeroporto(String origemAeroporto) {
-        this.origemAeroporto = origemAeroporto;
-    }
-
-    public String getDestinoAeroporto() {
-        return destinoAeroporto;
-    }
-
-    public void setDestinoAeroporto(String destinoAeroporto) {
-        this.destinoAeroporto = destinoAeroporto;
-    }
-
-    public LocalDateTime getDataPartida() {
-        return dataPartida;
-    }
-
-    public void setDataPartida(LocalDateTime dataPartida) {
-        this.dataPartida = dataPartida;
-    }
-
-    public double getDistanciakm() {
-        return distanciakm;
-    }
-
-    public void setDistanciakm(double distanciakm) {
-        this.distanciakm = distanciakm;
-    }
+    @JsonProperty("accumulated_airport_traffic")
+    private double accumulatedAirportTraffic;
 }
-
 
 

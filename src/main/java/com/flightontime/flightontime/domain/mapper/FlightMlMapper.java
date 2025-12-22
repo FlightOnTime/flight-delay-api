@@ -16,26 +16,26 @@ public class FlightMlMapper {
         // PT -> EN
         ml.setCarrier(dto.getCarrier());
         ml.setOrigin(dto.getOrigin());
-        ml.setDest(dto.getDestinoAeroporto());
+        ml.setDest(dto.getDestination());
 
         // data -> dayOfWeek (1=Mon ... 7=Sun)
-        ml.setDayOfWeek(dto.getDataPartida().getDayOfWeek().getValue());
+        ml.setDayOfWeek(dto.getDepartureDate().getDayOfWeek().getValue());
 
         // horário -> HHmm
         ml.setCrsDepTime(
-                dto.getDataPartida().getHour() * 100
-                        + dto.getDataPartida().getMinute()
+                dto.getDepartureDate().getHour() * 100
+                        + dto.getDepartureDate().getMinute()
         );
 
         // km -> milhas
-        ml.setDistance(dto.getDistanciakm() * KM_TO_MILES);
+        ml.setDistance(dto.getDistanceMiles() * KM_TO_MILES);
 
         // taxas já vêm prontas
-        ml.setOriginDelayRate(dto.getTaxaAtrasoAeroporto());
-        ml.setCarrierDelayRate(dto.getTaxaAtrasoCompanhia());
+        ml.setOriginDelayRate(dto.getAirportDelayRate());
+        ml.setCarrierDelayRate(dto.getAirlineDelayRate());
 
         // tráfego (double -> int)
-        ml.setOriginTraffic((int) dto.getTraficoAcumuladoAeroporto());
+        ml.setOriginTraffic((int) dto.getAccumulatedAirportTraffic());
 
         return ml;
     }

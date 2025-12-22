@@ -5,8 +5,6 @@ import com.flightontime.flightontime.domain.model.FlightPredictionRequest;
 
 public class FlightMlMapper {
 
-    private static final double KM_TO_MILES = 0.621371;
-
     private FlightMlMapper() {}
 
     public static FlightPredictionRequest toMl(PredictionRequest dto) {
@@ -28,7 +26,7 @@ public class FlightMlMapper {
         );
 
         // km -> milhas
-        ml.setDistance(dto.getDistanceMiles() * KM_TO_MILES);
+        ml.setDistance(dto.getDistanceMiles());
 
         // taxas já vêm prontas
         ml.setOriginDelayRate(dto.getAirportDelayRate());

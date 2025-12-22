@@ -33,7 +33,7 @@ public class FlightMlMapperTest {
                 () -> assertEquals("REC", ml.getDest()),
                 () -> assertEquals(2, ml.getDayOfWeek()),   // terça
                 () -> assertEquals(1620, ml.getCrsDepTime()),
-                () -> assertEquals(1317.31, ml.getDistance(), 0.01),
+                () -> assertEquals(2120.0, ml.getDistance(), 0.01),
                 () -> assertEquals(0.40, ml.getOriginDelayRate()),
                 () -> assertEquals(0.28, ml.getCarrierDelayRate()),
                 () -> assertEquals(2500, ml.getOriginTraffic())

@@ -25,7 +25,6 @@ public class FlightMlMapper {
                         + dto.getDepartureDate().getMinute()
         );
 
-        // km -> milhas
         ml.setDistance(dto.getDistanceMiles());
 
         // taxas já vêm prontas

@@ -3,6 +3,7 @@ package com.flightontime.flightontime.api.controller;
 import com.flightontime.flightontime.api.dto.request.PredictionRequest;
 import com.flightontime.flightontime.domain.model.FlightPredictionResponse;
 import com.flightontime.flightontime.domain.service.FlightPredictionService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class PredictController {
 
     @PostMapping
     public ResponseEntity<FlightPredictionResponse> predict(
-            @RequestBody PredictionRequest request
+            @Valid @RequestBody PredictionRequest request
     ) {
         FlightPredictionResponse response =
                 predictionService.predict(request);

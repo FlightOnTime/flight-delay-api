@@ -1,5 +1,6 @@
 package com.flightontime.flightontime;
 
+import com.flightontime.flightontime.api.dto.response.PredictionResponse;
 import com.flightontime.flightontime.domain.mapper.FlightPredictionResponseMapper;
 import com.flightontime.flightontime.domain.model.FlightPredictionResponse;
 import org.junit.jupiter.api.Test;
@@ -12,28 +13,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FlightPredictionResponseMapperTest {
 
     @Test
-    void deveCopiarResponseDoMlParaApi() {
+    void deveMapearResponseDoMlParaApiComApenasDoisCampos() {
 
         FlightPredictionResponse ml = new FlightPredictionResponse();
         ml.setPrevisao("ATRASADO");
         ml.setProbabilidadeAtraso(0.78);
-        ml.setConfianca("MEDIA");
-        ml.setPrincipaisFatores(
-                List.of("Alta taxa de atraso", "Horário de pico")
-        );
-        ml.setRecomendacoes(
-                List.of("Chegar mais cedo", "Monitorar status")
-        );
+        ml.setConfianca("MEDIA"); // ignorado
+        ml.setPrincipaisFatores(null); // ignorado
+        ml.setRecomendacoes(null); // ignorado
 
-        FlightPredictionResponse api =
-                FlightPredictionResponseMapper.fromMl(ml);
+        PredictionResponse api =
+                FlightPredictionResponseMapper.toApi(ml);
 
         assertAll(
                 () -> assertEquals("ATRASADO", api.getPrevisao()),
-                () -> assertEquals(0.78, api.getProbabilidadeAtraso()),
-                () -> assertEquals("MEDIA", api.getConfianca()),
-                () -> assertEquals(2, api.getPrincipaisFatores().size()),
-                () -> assertEquals(2, api.getRecomendacoes().size())
+                () -> assertEquals(0.78, api.getProbabilidade())
         );
     }
 }

@@ -1,22 +1,18 @@
 package com.flightontime.flightontime.domain.mapper;
 
+import com.flightontime.flightontime.api.dto.response.PredictionResponse;
 import com.flightontime.flightontime.domain.model.FlightPredictionResponse;
 
 public class FlightPredictionResponseMapper {
 
     private FlightPredictionResponseMapper() {}
 
-    public static FlightPredictionResponse fromMl(
+    public static PredictionResponse toApi(
             FlightPredictionResponse mlResponse
     ) {
-        FlightPredictionResponse response = new FlightPredictionResponse();
-
-        response.setPrevisao(mlResponse.getPrevisao());
-        response.setProbabilidadeAtraso(mlResponse.getProbabilidadeAtraso());
-        response.setConfianca(mlResponse.getConfianca());
-        response.setPrincipaisFatores(mlResponse.getPrincipaisFatores());
-        response.setRecomendacoes(mlResponse.getRecomendacoes());
-
-        return response;
+        return new PredictionResponse(
+                mlResponse.getPrevisao(),
+                mlResponse.getProbabilidadeAtraso()
+        );
     }
 }

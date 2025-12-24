@@ -1,8 +1,8 @@
-\# ✈️ FlightOnTime
+# ✈️ FlightOnTime
 
 
 
-\## 🎯 Objetivo do Projeto
+## 🎯 Objetivo do Projeto
 
 
 
@@ -10,7 +10,7 @@ O principal objetivo deste projeto é fornecer uma API robusta e escalável para
 
 
 
-\## 🏆 Contexto do Hackathon
+## 🏆 Contexto do Hackathon
 
 
 
@@ -18,25 +18,25 @@ Este projeto foi desenvolvido como parte do \*\*Hackathon\*\*, uma competição 
 
 
 
-\## 💻 Tecnologias Utilizadas
+## 💻 Tecnologias Utilizadas
 
 
 
-\- \*\*Java 17:\*\* A linguagem de programação principal da aplicação.
+- **Java 17:** A linguagem de programação principal da aplicação.
 
-\- \*\*Spring Boot:\*\* Framework para criar aplicações Spring independentes e prontas para produção.
+- **Spring Boot:** Framework para criar aplicações Spring independentes e prontas para produção.
 
-\- \*\*Spring Web MVC:\*\* Fornece arquitetura Model-View-Controller e componentes prontos para desenvolver aplicações web flexíveis e desacopladas.
+- **Spring Web MVC:** Fornece arquitetura Model-View-Controller e componentes prontos para desenvolver aplicações web flexíveis e desacopladas.
 
-\- \*\*Lombok:\*\* Uma biblioteca Java que se conecta automaticamente ao seu editor e ferramentas de build, ajudando a escrever menos código repetitivo (boilerplate).
+- **Lombok:** Uma biblioteca Java que se conecta automaticamente ao seu editor e ferramentas de build, ajudando a escrever menos código repetitivo (boilerplate).
 
-\- \*\*SpringDoc OpenAPI:\*\* Biblioteca que gera documentação OpenAPI 3.0 para projetos Spring Boot.
+- **SpringDoc OpenAPI:** Biblioteca que gera documentação OpenAPI 3.0 para projetos Spring Boot.
 
-\- \*\*Maven:\*\* Uma poderosa ferramenta de gerenciamento de projetos baseada no conceito de Modelo de Objeto de Projeto (POM).
+- **Maven:** Uma poderosa ferramenta de gerenciamento de projetos baseada no conceito de Modelo de Objeto de Projeto (POM).
 
 
 
-\## 🚀 Como Executar Localmente
+## 🚀 Como Executar Localmente
 
 
 
@@ -44,9 +44,9 @@ Para rodar o projeto localmente, certifique-se de ter o seguinte instalado:
 
 
 
-\- \*\*Java 17:\*\* Certifique-se de ter o JDK do Java 17 instalado e configurado no seu sistema.
+- **Java 17:** Certifique-se de ter o JDK do Java 17 instalado e configurado no seu sistema.
 
-\- \*\*Maven:\*\* Este projeto usa o Maven para gerenciamento de dependências.
+- **Maven:** Este projeto usa o Maven para gerenciamento de dependências.
 
 
 
@@ -62,11 +62,11 @@ mvn spring-boot:run
 
 
 
-A API estará disponível em: \[http://localhost:8080](http://localhost:8080)
+A API estará disponível em: [http://localhost:8080](http://localhost:8080)
 
 
 
-\## 📚 Documentação da API
+## 📚 Documentação da API
 
 
 
@@ -74,11 +74,11 @@ A documentação da API é gerada automaticamente usando o SpringDoc OpenAPI e p
 
 
 
-👉 \[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+👉 [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
 
 
-\## 🔗 Principais Endpoints da API
+## 🔗 Principais Endpoints da API
 
 
 
@@ -86,19 +86,19 @@ A seguir estão os principais endpoints da API disponíveis na aplicação:
 
 
 
-\### Endpoint de Teste
+### Endpoint de Teste
 
 
 
-\- `GET /predict/hello`
+- `GET /predict/hello`
 
-&nbsp; - \*\*Descrição:\*\* Um endpoint de teste simples para verificar se a API está rodando corretamente.
+&nbsp; - **Descrição:** Um endpoint de teste simples para verificar se a API está rodando corretamente.
 
-&nbsp; - \*\*Resposta:\*\* Retorna uma mensagem "Hello World!".
+&nbsp; - **Resposta:** Retorna uma mensagem "Hello World!".
 
 
 
-\## 🤝 Fluxo de Trabalho da Equipe
+## 🤝 Fluxo de Trabalho da Equipe
 
 
 
@@ -106,9 +106,9 @@ Para garantir um processo de desenvolvimento fluido e eficiente, nossa equipe se
 
 
 
-1\.  \*\*Branching:\*\* Todas as novas funcionalidades e correções de bugs devem ser desenvolvidas em branches separadas, seguindo a convenção de nomenclatura `feature/` ou `fix/`.
+1.  **Branching:** Todas as novas funcionalidades e correções de bugs devem ser desenvolvidas em branches separadas, seguindo a convenção de nomenclatura `feature/` ou `fix/`.
 
-2\.  \*\*Code Review:\*\* Assim que uma funcionalidade estiver completa, um pull request deve ser aberto para revisão de código. Pelo menos um membro da equipe deve aprovar as alterações antes que possam ser mescladas (merged).
+2.  **Code Review:** Assim que uma funcionalidade estiver completa, um pull request deve ser aberto para revisão de código. Pelo menos um membro da equipe deve aprovar as alterações antes que possam ser mescladas (merged).
 
-3\.  \*\*Testes:\*\* Todo novo código deve ser acompanhado por testes unitários para garantir que está funcionando corretamente e não introduz regressões.
+3.  **Testes:** Todo novo código deve ser acompanhado por testes unitários para garantir que está funcionando corretamente e não introduz regressões.
 

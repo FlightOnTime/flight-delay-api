@@ -1,7 +1,6 @@
 package com.flightontime.flightontime.api.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,38 +14,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PredictionRequest {
 
-    @NotBlank
     @JsonProperty("carrier")
     private String carrier;
 
-    @NotBlank
     @JsonProperty("origin")
     private String origin;
 
-    @NotBlank
-    @JsonProperty("destination")
+    @JsonProperty("dest")
     private String destination;
 
-    @NotNull
     @JsonProperty("departure_date")
     private LocalDateTime departureDate;
 
-    @Positive
-    @JsonProperty("distance_miles")
+    @JsonProperty("distance")
     private double distanceMiles;
 
-    @Min(0)
-    @Max(1)
-    @JsonProperty("airport_delay_rate")
-    private double airportDelayRate;
+    @JsonProperty("day_of_week")
+    private int dayOfWeek;
 
-    @Min(0)
-    @Max(1)
-    @JsonProperty("airline_delay_rate")
-    private double airlineDelayRate;
+    @JsonProperty("origin_delay_rate")
+    private double originDelayRate;
 
-    @PositiveOrZero
-    @JsonProperty("accumulated_airport_traffic")
+    @JsonProperty("carrier_delay_rate")
+    private double carrierDelayRate;
+
+    @JsonProperty("origin_traffic")
     private double accumulatedAirportTraffic;
 }
 

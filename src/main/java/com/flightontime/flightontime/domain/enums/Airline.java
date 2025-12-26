@@ -1,4 +1,4 @@
 package com.flightontime.flightontime.domain.enums;
 
-public class Airline {
+public enum Airline {
 }

@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PredictionRequest {
 
-    @NotBlank
     @JsonProperty("carrier")
     private Airline carrier;
 

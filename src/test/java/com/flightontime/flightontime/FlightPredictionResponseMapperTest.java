@@ -1,11 +1,10 @@
 package com.flightontime.flightontime;
 
+import com.flightontime.flightontime.api.dto.enums.PredictionStatus;
 import com.flightontime.flightontime.api.dto.response.PredictionResponse;
 import com.flightontime.flightontime.domain.mapper.FlightPredictionResponseMapper;
 import com.flightontime.flightontime.domain.model.FlightPredictionResponse;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,8 +25,8 @@ public class FlightPredictionResponseMapperTest {
                 FlightPredictionResponseMapper.toApi(ml);
 
         assertAll(
-                () -> assertEquals("ATRASADO", api.getPrevisao()),
-                () -> assertEquals(0.78, api.getProbabilidade())
+                () -> assertEquals(PredictionStatus.DELAYED, api.getStatus()),
+                () -> assertEquals(0.78, api.getProbability())
         );
     }
 }

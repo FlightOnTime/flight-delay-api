@@ -1,6 +1,7 @@
 package com.flightontime.flightontime.api.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.flightontime.flightontime.domain.enums.Airline;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,16 +16,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PredictionRequest {
 
-    @NotBlank
     @JsonProperty("carrier")
-    private String carrier;
+    private Airline carrier;
 
     @NotBlank
     @JsonProperty("origin")
     private String origin;
 
     @NotBlank
-    @JsonProperty("destination")
+    @JsonProperty("dest")
     private String destination;
 
     @NotNull
@@ -32,22 +32,28 @@ public class PredictionRequest {
     private LocalDateTime departureDate;
 
     @Positive
-    @JsonProperty("distance_miles")
+    @JsonProperty("distance")
     private double distanceMiles;
 
-    @Min(0)
-    @Max(1)
-    @JsonProperty("airport_delay_rate")
-    private double airportDelayRate;
+    @Min(1)
+    @Max(7)
+    @JsonProperty("day_of_week")
+    private int dayOfWeek;
 
-    @Min(0)
-    @Max(1)
-    @JsonProperty("airline_delay_rate")
-    private double airlineDelayRate;
+    @DecimalMin("0.0")
+    @DecimalMax("1.0")
+    @JsonProperty("origin_delay_rate")
+    private double originDelayRate;
+
+    @DecimalMin("0.0")
+    @DecimalMax("1.0")
+    @JsonProperty("carrier_delay_rate")
+    private double carrierDelayRate;
 
     @PositiveOrZero
-    @JsonProperty("accumulated_airport_traffic")
-    private double accumulatedAirportTraffic;
+    @JsonProperty("origin_traffic")
+    private Integer accumulatedAirportTraffic;
+
 }
 
 

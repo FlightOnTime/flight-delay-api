@@ -1,5 +1,6 @@
 package com.flightontime.flightontime.api.dto.response;
 
+import com.flightontime.flightontime.api.dto.enums.PredictionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PredictionResponse {
 
-    private String previsao;
-    private double probabilidade;
+    private PredictionStatus status;
+    private Double probability;
 }

@@ -22,7 +22,7 @@ public class FlightMlMapperTest {
                 "REC",
                 LocalDateTime.of(2025, 3, 18, 16, 20),
                 2120.0,
-                0,
+                2,
                 0.0,
                 0,
                 0

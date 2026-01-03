@@ -16,17 +16,19 @@ public class FlightMlMapperTest {
     @Test
     void deveMapearPredictionRequestParaFlightMlRequest() {
 
-        PredictionRequest dto = new PredictionRequest(
-                Airline.GOL_DEVELOPMENTS,
-                "VCP",
-                "REC",
-                LocalDateTime.of(2025, 3, 18, 16, 20),
-                2120.0,
-                2,
-                0.0,
-                0,
-                0
-        );
+        PredictionRequest dto = PredictionRequest.builder()
+                .carrier(Airline.GOL_DEVELOPMENTS)
+                .origin("VCP")
+                .destination("REC")
+                .flightNumber("G3-1234")
+                .departureDate(LocalDateTime.of(2025, 3, 18, 16, 20))
+                .distanceMiles(2120.0)
+                .dayOfWeek(2)
+                .originDelayRate(0.0)
+                .carrierDelayRate(0.0)
+                .isHoliday(0)
+                .accumulatedAirportTraffic(0)
+                .build();
 
         FlightPredictionRequest ml = FlightMlMapper.toMl(dto);
 
@@ -34,12 +36,11 @@ public class FlightMlMapperTest {
                 () -> assertEquals("G4", ml.getCarrier()), // IATA
                 () -> assertEquals("VCP", ml.getOrigin()),
                 () -> assertEquals("REC", ml.getDest()),
-                () -> assertEquals(2, ml.getDayOfWeek()),   // terça
+                () -> assertEquals(2, ml.getDayOfWeek()), // terça
                 () -> assertEquals(1620, ml.getCrsDepTime()),
                 () -> assertEquals(2120.0, ml.getDistance(), 0.01),
                 () -> assertEquals(0, ml.getOriginDelayRate()),
                 () -> assertEquals(0.0, ml.getCarrierDelayRate()),
-                () -> assertEquals(0, ml.getOriginTraffic())
-        );
+                () -> assertEquals(0, ml.getOriginTraffic()));
     }
 }

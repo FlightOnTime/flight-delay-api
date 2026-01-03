@@ -1,0 +1,37 @@
+{
+  "version": "7.0",
+  "timestamp": "2026-01-03 00:55:05",
+  "random_state": 42,
+  "train_size": 11673729,
+  "test_size": 2918565,
+  "optimal_threshold": 0.24436875228000565,
+  "metrics": {
+    "roc_auc": 0.6251554865405178,
+    "recall": 0.942830461665379,
+    "precision": 0.17760802486787658,
+    "f1": 0.29890843289358215,
+    "accuracy": 0.2762436334294422
+  },
+  "business_metrics": {
+    "true_positives": 450293,
+    "false_negatives": 27304,
+    "false_positives": 2085026,
+    "true_negatives": 355942,
+    "cost_fn_usd": 13652000,
+    "cost_fp_usd": 104251300,
+    "total_cost_usd": 117903300,
+    "roi_annual_usd": 237177000
+  },
+  "cross_validation": {
+    "method": "TimeSeriesSplit",
+    "n_splits": 3,
+    "cv_roc_auc_mean": 0.6964412213924978,
+    "cv_roc_auc_std": 0.0022521503009449995
+  },
+  "data_leakage_prevention": [
+    "Split temporal expl\u00edcito (80/20)",
+    "Features hist\u00f3ricas com shift(1)",
+    "Valida\u00e7\u00e3o TimeSeriesSplit",
+    "Dataset ordenado por FlightDate"
+  ]
+}

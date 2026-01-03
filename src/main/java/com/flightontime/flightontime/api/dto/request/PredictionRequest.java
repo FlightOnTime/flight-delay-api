@@ -27,8 +27,12 @@ public class PredictionRequest {
     @JsonProperty("dest")
     private String destination;
 
+    @NotBlank
+    @JsonProperty("flightNumber")
+    private String flightNumber;
+
     @NotNull
-    @JsonProperty("departure_date")
+    @JsonProperty("departureDate")
     private LocalDateTime departureDate;
 
     @Positive
@@ -51,9 +55,11 @@ public class PredictionRequest {
     private double carrierDelayRate;
 
     @PositiveOrZero
+    @JsonProperty("is_holiday")
+    private Integer isHoliday;
+
+    @PositiveOrZero
     @JsonProperty("origin_traffic")
     private Integer accumulatedAirportTraffic;
 
 }
-
-

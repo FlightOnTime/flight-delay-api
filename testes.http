@@ -1,0 +1,138 @@
+# ========================================
+# FLIGHTONTIME API - TESTES v2.0 (CORRIGIDO)
+# ========================================
+# Threshold: 0.409 (otimizado)
+# ========================================
+
+@baseUrl = http://localhost:8000
+
+### CONNECTIVITY CHECK (Docs)
+GET {{baseUrl}}/docs
+
+### TESTE 1: VOO CLARAMENTE PONTUAL
+# Características:
+# - Delta Airlines (pontual)
+# - ATL → LAX (rota eficiente)
+# - Terça-feira 10h (horário bom -> 1000)
+# - Taxas de atraso baixas
+# ESPERADO: ON_TIME
+POST {{baseUrl}}/predict
+Content-Type: application/json
+
+{
+  "airline": "DL", 
+  "origin": "ATL",
+  "dest": "LAX",
+  "distance": 3100.0,
+  "day_of_week": 2,
+  "flight_date": "2026-03-15",
+  "crs_dep_time": 1000,
+  "origin_delay_rate": 0.05,
+  "carrier_delay_rate": 0.05,
+  "origin_traffic": 2000
+}
+
+### TESTE 2: VOO CLARAMENTE ATRASADO
+# Características:
+# - American Airlines (média)
+# - ORD → LGA (Chicago problemático)
+# - Véspera de Natal, 18h (pior cenário -> 1800)
+# - Taxas de atraso altas
+# ESPERADO: DELAYED
+POST {{baseUrl}}/predict
+Content-Type: application/json
+
+{
+  "airline": "AA",
+  "origin": "ORD",
+  "dest": "LGA",
+  "distance": 1100.0,
+  "day_of_week": 5,
+  "flight_date": "2026-04-10",
+  "crs_dep_time": 1830,
+  "origin_delay_rate": 0.45,
+  "carrier_delay_rate": 0.55,
+  "origin_traffic": 3500
+}
+
+### TESTE 3: VOO BORDERLINE (INCERTO)
+# Características:
+# - United Airlines (média)
+# - SFO → DEN (rota comum)
+# - Quarta-feira 14h (horário médio -> 1400)
+# ESPERADO: Pode ser ON_TIME ou DELAYED
+POST {{baseUrl}}/predict
+Content-Type: application/json
+
+{
+  "airline": "UA",
+  "origin": "SFO",
+  "dest": "DEN",
+  "distance": 1500.0,
+  "day_of_week": 3,
+  "flight_date": "2026-04-10",
+  "crs_dep_time": 1400,
+  "origin_delay_rate": 0.28,
+  "carrier_delay_rate": 0.30,
+  "origin_traffic": 3500
+}
+
+### TESTE 4: VOO DISTÂNCIA REALISTA JFK-LAX
+# Corrigindo erro anterior: distância correta
+# Horário: 10:30 -> 1030
+# ESPERADO: ON_TIME
+POST {{baseUrl}}/predict
+Content-Type: application/json
+
+{
+  "airline": "DL",
+  "origin": "JFK",
+  "dest": "LAX",
+  "distance": 3983.0,
+  "day_of_week": 3,
+  "flight_date": "2026-05-20",
+  "crs_dep_time": 1030,
+  "origin_delay_rate": 0.22,
+  "carrier_delay_rate": 0.15,
+  "origin_traffic": 2800
+}
+
+### TESTE 5: FERIADO + FIM DE SEMANA + NOITE
+# Pior combinação possível
+# Horário: 21:00 -> 2100
+# ESPERADO: DELAYED
+POST {{baseUrl}}/predict
+Content-Type: application/json
+
+{
+  "airline": "NK",
+  "origin": "LGA",
+  "dest": "FLL",
+  "distance": 1760.0,
+  "day_of_week": 5,
+  "flight_date": "2026-07-03",
+  "crs_dep_time": 2100,
+  "origin_delay_rate": 0.38,
+  "carrier_delay_rate": 0.42,
+  "origin_traffic": 4200
+}
+
+### TESTE 6: VOO CURTO MADRUGADA
+# Voos noturnos/madrugada tendem a atrasar menos
+# Horário: 06:30 -> 0630
+# ESPERADO: ON_TIME
+POST {{baseUrl}}/predict
+Content-Type: application/json
+
+{
+  "airline": "WN",
+  "origin": "PHX",
+  "dest": "LAS",
+  "distance": 412.0,
+  "day_of_week": 2,
+  "flight_date": "2026-02-10",
+  "crs_dep_time": 630,
+  "origin_delay_rate": 0.18,
+  "carrier_delay_rate": 0.20,
+  "origin_traffic": 1800
+}

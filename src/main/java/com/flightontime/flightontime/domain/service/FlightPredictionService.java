@@ -1,96 +1,129 @@
 package com.flightontime.flightontime.domain.service;
 
+import com.flightontime.flightontime.api.dto.request.DataScienceRequest;
 import com.flightontime.flightontime.api.dto.request.PredictionRequest;
+import com.flightontime.flightontime.api.dto.response.DataScienceResponse;
 import com.flightontime.flightontime.api.dto.response.PredictionResponse;
-import com.flightontime.flightontime.client.MLApiClient;
-import com.flightontime.flightontime.domain.mapper.FlightMlMapper;
-import com.flightontime.flightontime.domain.mapper.FlightPredictionResponseMapper;
-import com.flightontime.flightontime.domain.model.FlightPredictionResponse;
-import com.flightontime.flightontime.domain.model.PredictionHistory;
-import com.flightontime.flightontime.domain.repository.PredictionHistoryRepository;
-import lombok.RequiredArgsConstructor; // Usando RequiredArgsConstructor para injeção limpa
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 @Service
-@RequiredArgsConstructor
 public class FlightPredictionService {
 
-    private final MLApiClient mlApiClient;
-    private final PredictionHistoryRepository historyRepository; // Repositório injetado
+    private final RestTemplate restTemplate;
+
+    // Pega a URL do application.properties
+    @Value("${ml.api.base-url:http://127.0.0.1:8000}")
+    private String dsApiUrl;
+
+    public FlightPredictionService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public PredictionResponse predict(PredictionRequest request) {
-        // 1. Converte Request da API para formato do Modelo ML (Python)
-        var mlRequest = FlightMlMapper.toMl(request);
+        DataScienceRequest dsRequest = convertToDsRequest(request);
+        String url = dsApiUrl + "/predict";
 
-        // 2. Chama a API Python
-        FlightPredictionResponse mlResponse;
         try {
-            mlResponse = mlApiClient.predict(mlRequest);
-        } catch (Exception e) {
-            throw new RuntimeException("AI Service unavailable or returned an error: " + e.getMessage(), e);
-        }
+            // 1. Pega a resposta como String Pura para não falhar no parse automático
+            ResponseEntity<String> rawResponse = restTemplate.postForEntity(url, dsRequest, String.class);
 
-        // 3. Converte Resposta do Modelo para formato da API
-        var apiResponse = FlightPredictionResponseMapper.toApi(mlResponse);
+            // 2. LOGA O QUE VEIO (Isso vai revelar o erro se persistir)
+            System.out.println("🔍 STATUS PYTHON: " + rawResponse.getStatusCode());
+            System.out.println("📦 BODY PYTHON: " + rawResponse.getBody());
 
-        // 4. SALVAR NO BANCO DE DADOS (A parte que faltava!)
-        saveHistory(request, apiResponse);
+            // 3. Tenta converter manualmente com suporte a NaN
+            ObjectMapper mapper = JsonMapper.builder()
+                    .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
+                    .build();
 
-        return apiResponse;
-    }
+            DataScienceResponse dsResponse = mapper.readValue(rawResponse.getBody(), DataScienceResponse.class);
 
-    private void saveHistory(PredictionRequest request, PredictionResponse response) {
-        try {
-            PredictionHistory history = new PredictionHistory();
-
-            // Mapeando dados da requisição (Ajustado para os nomes em português da
-            // Entidade)
-            history.setCompanhiaAerea(request.getCarrier() != null ? request.getCarrier().name() : null);
-            history.setOrigemAeroporto(request.getOrigin());
-            history.setDestinoAeroporto(request.getDestination());
-
-            // Convertendo a String do DTO para LocalDateTime
-            // Certifique-se que request.getDepartureDate() retorna uma String no formato
-            // ISO (ex: 2023-10-27T10:15:30)
-            history.setDataPartida(request.getDepartureDate());
-
-            if (request.getDepartureDate() != null) {
-                // Converte DayOfWeek (1=Seg, 7=Dom) para índice 0=Dom, 1=Seg...
-                int dayIndex = request.getDepartureDate().getDayOfWeek().getValue() % 7;
-                history.setDiaDaSemana(getDayOfWeekName(dayIndex));
-            }
-
-            history.setModeloVersao("randomforest_v7_final.pkl");
-
-            // Mapeando dados da resposta
-            // Nota: Verifique se 'status' na Resposta é Boolean ou String para bater com a
-            // Entidade
-            history.setAtrasoPrevisto(
-                    com.flightontime.flightontime.api.dto.enums.PredictionStatus.DELAYED.equals(response.getStatus()));
-            history.setProbabilidadeAtraso(response.getProbability());
-
-            // Metadados e Status fixo
-            history.setStatus(true); // O campo 'status' na sua entidade é obrigatório (nullable = false)
-            history.setRequestAt(LocalDateTime.now()); // Na entidade o campo é 'requestAt', não 'createdAt'
-
-            // Persistir
-            historyRepository.save(history);
+            return mapToPredictionResponse(dsResponse);
 
         } catch (Exception e) {
-            // Log de erro para não quebrar a resposta ao usuário se o banco falhar
-            System.err.println("Erro ao salvar histórico de predição: " + e.getMessage());
-            e.printStackTrace();
+            // Agora teremos o log acima para saber o que aconteceu
+            System.err.println("❌ ERRO NO PARSE: " + e.getMessage());
+            throw new RuntimeException("Falha ao processar resposta do Python. Ver logs.", e);
         }
     }
 
-    // Método auxiliar para converter número do dia em nome
-    private String getDayOfWeekName(Integer dayOfWeek) {
-        if (dayOfWeek == null)
+    private DataScienceRequest convertToDsRequest(PredictionRequest req) {
+        DataScienceRequest ds = new DataScienceRequest();
+
+        // Mapeia Companhia (Lógica simplificada para MVP)
+        ds.setAirline(mapAirlineCode(req.getCompanhia()));
+        ds.setOrigin(req.getOrigemAeroporto());
+        ds.setDest(req.getDestinoAeroporto());
+
+        // Extrai a parte da DATA (yyyy-MM-dd) do LocalDateTime
+        ds.setFlightDate(req.getDataPartida().toLocalDate().toString());
+
+        // Conversão de Data e Hora
+        ds.setDayOfWeek(req.getDataPartida().getDayOfWeek().getValue());
+        int hour = req.getDataPartida().getHour();
+        int minute = req.getDataPartida().getMinute();
+        ds.setCrsDepTime(hour * 100 + minute); // Ex: 14:30 -> 1430
+
+        // CRÍTICO: Conversão KM -> Milhas (O modelo foi treinado em milhas)
+        ds.setDistance(req.getDistanciaKm() * 0.621371);
+
+        return ds;
+    }
+
+    private String mapAirlineCode(String companhiaInput) {
+        if (companhiaInput == null)
+            return "XX";
+        String input = companhiaInput.toUpperCase();
+
+        // Mapeamento das principais cias brasileiras e americanas
+        if (input.contains("LATAM"))
+            return "LA";
+        if (input.contains("GOL"))
+            return "G3";
+        if (input.contains("AZUL"))
+            return "AD";
+        if (input.contains("AMERICAN"))
+            return "AA";
+        if (input.contains("UNITED"))
+            return "UA";
+        if (input.contains("DELTA"))
+            return "DL";
+
+        // Fallback: tenta pegar os 2 primeiros chars
+        return input.length() > 2 ? input.substring(0, 2) : input;
+    }
+
+    private PredictionResponse mapToPredictionResponse(DataScienceResponse dsResponse) {
+        if (dsResponse == null)
             return null;
 
-        String[] days = { "Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" };
-        return dayOfWeek >= 0 && dayOfWeek < days.length ? days[dayOfWeek] : null;
+        PredictionResponse response = new PredictionResponse();
+
+        // Converte a String do Python para o Integer esperado pelo Front-End (0 ou 1)
+        String predStr = dsResponse.getPrediction() != null ? dsResponse.getPrediction() : "";
+        Integer predInt = predStr.equalsIgnoreCase("Pontual") ? 0 : 1;
+        response.setPredicao(predInt);
+
+        response.setProbabilidade(dsResponse.getProbability() != null ? dsResponse.getProbability() : 0.0);
+        response.setMensagem(
+                dsResponse.getMessage() != null ? dsResponse.getMessage() : dsResponse.getRecommendation());
+
+        if (dsResponse.getInternalMetrics() != null) {
+            PredictionResponse.InternalMetrics metrics = new PredictionResponse.InternalMetrics();
+
+            metrics.setRiscoHistoricoOrigem(dsResponse.getInternalMetrics().getHistoricalOriginRisk());
+            metrics.setRiscoHistoricoCompanhia(dsResponse.getInternalMetrics().getHistoricalCarrierRisk());
+            metrics.setFonte(dsResponse.getInternalMetrics().getSource());
+
+            response.setMetricasInternas(metrics);
+        }
+
+        return response;
     }
 }

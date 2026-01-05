@@ -1,7 +1,6 @@
 package com.flightontime.flightontime.api.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.flightontime.flightontime.domain.enums.Airline;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,44 +15,26 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PredictionRequest {
 
-    @JsonProperty("carrier")
-    private Airline carrier;
+    @NotBlank(message = "Companhia é obrigatória")
+    @JsonProperty("companhia") // Contrato v2.1: Frontend envia "companhia"
+    private String companhia;
 
-    @NotBlank
-    @JsonProperty("origin")
-    private String origin;
+    @NotBlank(message = "Origem é obrigatória")
+    @Pattern(regexp = "^[A-Z]{3}$", message = "Código IATA da origem deve ter 3 letras")
+    @JsonProperty("origem_aeroporto") // Contrato v2.1
+    private String origemAeroporto;
 
-    @NotBlank
-    @JsonProperty("dest")
-    private String destination;
+    @NotBlank(message = "Destino é obrigatório")
+    @Pattern(regexp = "^[A-Z]{3}$", message = "Código IATA do destino deve ter 3 letras")
+    @JsonProperty("destino_aeroporto") // Contrato v2.1
+    private String destinoAeroporto;
 
-    @NotNull
-    @JsonProperty("departure_date")
-    private LocalDateTime departureDate;
+    @NotNull(message = "Data de partida é obrigatória")
+    @JsonProperty("data_partida") // Contrato v2.1
+    private LocalDateTime dataPartida;
 
-    @Positive
-    @JsonProperty("distance")
-    private double distanceMiles;
-
-    @Min(1)
-    @Max(7)
-    @JsonProperty("day_of_week")
-    private int dayOfWeek;
-
-    @DecimalMin("0.0")
-    @DecimalMax("1.0")
-    @JsonProperty("origin_delay_rate")
-    private double originDelayRate;
-
-    @DecimalMin("0.0")
-    @DecimalMax("1.0")
-    @JsonProperty("carrier_delay_rate")
-    private double carrierDelayRate;
-
-    @PositiveOrZero
-    @JsonProperty("origin_traffic")
-    private Integer accumulatedAirportTraffic;
-
+    @NotNull(message = "Distância é obrigatória")
+    @Positive(message = "Distância deve ser positiva")
+    @JsonProperty("distancia_km") // Contrato v2.1: Entrada em KM
+    private Double distanciaKm;
 }
-
-

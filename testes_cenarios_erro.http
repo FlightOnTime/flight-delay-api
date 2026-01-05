@@ -1,0 +1,67 @@
+### ==========================================
+### Testes de Robustez e Cenários de Erro
+### API: Flight Delay Prediction
+### ==========================================
+
+### ==========================================
+### Cenário 1: Aeroporto Desconhecido (Código IATA válido mas inexistente)
+### Objetivo: Validar comportamento com código de aeroporto inexistente no treinamento
+### Resultado Esperado: 200 OK (tratado como 'Outros') ou 500 se não tratado
+### ==========================================
+POST http://localhost:8080/api/v1/predict
+Content-Type: application/json
+
+{
+    "companhia": "LATAM",
+    "origem_aeroporto": "ZZZ",
+    "destino_aeroporto": "JFK",
+    "data_partida": "2026-07-15T14:30:00",
+    "distancia_km": 8000
+}
+
+### ==========================================
+### Cenário 2: Data com Formato Inválido
+### Objetivo: Validar rejeição de formato de data BR (DD/MM/YYYY)
+### Resultado Esperado: 400 Bad Request (Jackson parse error)
+### ==========================================
+POST http://localhost:8080/api/v1/predict
+Content-Type: application/json
+
+{
+    "companhia": "GOL",
+    "origem_aeroporto": "GRU",
+    "destino_aeroporto": "GIG",
+    "data_partida": "01/01/2026",
+    "distancia_km": 400
+}
+
+### ==========================================
+### Cenário 3: Campo Obrigatório Faltando (companhia)
+### Objetivo: Testar validação @NotNull do DTO
+### Resultado Esperado: 400 Bad Request (MethodArgumentNotValidException)
+### ==========================================
+POST http://localhost:8080/api/v1/predict
+Content-Type: application/json
+
+{
+    "origem_aeroporto": "GRU",
+    "destino_aeroporto": "BSB",
+    "data_partida": "2026-03-10T08:00:00",
+    "distancia_km": 870
+}
+
+### ==========================================
+### Cenário 4: Tipo de Dado Incorreto (String em campo numérico)
+### Objetivo: Confirmar rejeição de tipo incompatível
+### Resultado Esperado: 400 Bad Request (JSON parse error)
+### ==========================================
+POST http://localhost:8080/api/v1/predict
+Content-Type: application/json
+
+{
+    "companhia": "AZUL",
+    "origem_aeroporto": "VCP",
+    "destino_aeroporto": "SDU",
+    "data_partida": "2026-05-20T16:45:00",
+    "distancia_km": "MUITO LONGE"
+}

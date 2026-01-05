@@ -1,0 +1,92 @@
+[
+  {
+    "indice_voo": 0,
+    "previsao": "Atrasado",
+    "probabilidade_atraso": 0.558,
+    "confianca": "Moderada",
+    "principais_fatores": [
+      "dephour: 27.3% de importância",
+      "carrier_delay_rate: 14.1% de importância",
+      "time_of_day: 13.5% de importância"
+    ],
+    "recomendacoes": [
+      "⚠️ Reclassificar voo como potencialmente atrasado",
+      "📢 Notificar passageiros com conexões (>2h)",
+      "🎯 Antecipar boarding em 10-15 minutos",
+      "🚪 Reservar gate alternativo",
+      "🔧 Realizar pré-voo com margem de tempo"
+    ]
+  },
+  {
+    "indice_voo": 1,
+    "previsao": "Atrasado",
+    "probabilidade_atraso": 0.518,
+    "confianca": "Moderada",
+    "principais_fatores": [
+      "dephour: 27.3% de importância",
+      "carrier_delay_rate: 14.1% de importância",
+      "time_of_day: 13.5% de importância"
+    ],
+    "recomendacoes": [
+      "⚠️ Reclassificar voo como potencialmente atrasado",
+      "📢 Notificar passageiros com conexões (>2h)",
+      "🎯 Antecipar boarding em 10-15 minutos",
+      "🚪 Reservar gate alternativo",
+      "🔧 Realizar pré-voo com margem de tempo"
+    ]
+  },
+  {
+    "indice_voo": 2,
+    "previsao": "Atrasado",
+    "probabilidade_atraso": 0.479,
+    "confianca": "Baixa",
+    "principais_fatores": [
+      "dephour: 27.3% de importância",
+      "carrier_delay_rate: 14.1% de importância",
+      "time_of_day: 13.5% de importância"
+    ],
+    "recomendacoes": [
+      "⚠️ Reclassificar voo como potencialmente atrasado",
+      "📢 Notificar passageiros com conexões (>2h)",
+      "🎯 Antecipar boarding em 10-15 minutos",
+      "🚪 Reservar gate alternativo",
+      "🔧 Realizar pré-voo com margem de tempo"
+    ]
+  },
+  {
+    "indice_voo": 3,
+    "previsao": "Atrasado",
+    "probabilidade_atraso": 0.514,
+    "confianca": "Moderada",
+    "principais_fatores": [
+      "dephour: 27.3% de importância",
+      "carrier_delay_rate: 14.1% de importância",
+      "time_of_day: 13.5% de importância"
+    ],
+    "recomendacoes": [
+      "⚠️ Reclassificar voo como potencialmente atrasado",
+      "📢 Notificar passageiros com conexões (>2h)",
+      "🎯 Antecipar boarding em 10-15 minutos",
+      "🚪 Reservar gate alternativo",
+      "🔧 Realizar pré-voo com margem de tempo"
+    ]
+  },
+  {
+    "indice_voo": 4,
+    "previsao": "Atrasado",
+    "probabilidade_atraso": 0.264,
+    "confianca": "Baixa",
+    "principais_fatores": [
+      "dephour: 27.3% de importância",
+      "carrier_delay_rate: 14.1% de importância",
+      "time_of_day: 13.5% de importância"
+    ],
+    "recomendacoes": [
+      "⚠️ Reclassificar voo como potencialmente atrasado",
+      "📢 Notificar passageiros com conexões (>2h)",
+      "🎯 Antecipar boarding em 10-15 minutos",
+      "🚪 Reservar gate alternativo",
+      "🔧 Realizar pré-voo com margem de tempo"
+    ]
+  }
+]

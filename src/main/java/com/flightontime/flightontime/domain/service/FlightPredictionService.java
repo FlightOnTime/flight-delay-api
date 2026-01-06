@@ -4,8 +4,12 @@ import com.flightontime.flightontime.api.dto.request.DataScienceRequest;
 import com.flightontime.flightontime.api.dto.request.PredictionRequest;
 import com.flightontime.flightontime.api.dto.response.DataScienceResponse;
 import com.flightontime.flightontime.api.dto.response.PredictionResponse;
+import com.flightontime.flightontime.api.exception.InvalidCarrierException;
+import com.flightontime.flightontime.api.exception.MlServiceUnavailableException;
+import com.flightontime.flightontime.api.exception.ModelNotLoadedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,14 +46,29 @@ public class FlightPredictionService {
                     .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
                     .build();
 
-            DataScienceResponse dsResponse = mapper.readValue(rawResponse.getBody(), DataScienceResponse.class);
+            DataScienceResponse dsResponse =
+                    mapper.readValue(rawResponse.getBody(), DataScienceResponse.class);
+
+            // Se o Python respondeu algo inválido ou vazio
+            if (dsResponse == null) {
+                throw new ModelNotLoadedException("Resposta vazia do modelo de ML");
+            }
 
             return mapToPredictionResponse(dsResponse);
 
+        } catch (ResourceAccessException e) {
+            // ML fora do ar, timeout, conexão recusada
+            throw new MlServiceUnavailableException("Serviço de ML indisponível");
+
+        } catch (InvalidCarrierException e) {
+            // Companhia inválida: deixa o handler global tratar
+            throw e;
+
         } catch (Exception e) {
-            // Agora teremos o log acima para saber o que aconteceu
-            System.err.println("❌ ERRO NO PARSE: " + e.getMessage());
-            throw new RuntimeException("Falha ao processar resposta do Python. Ver logs.", e);
+            // Erro de parse, resposta inválida, NaN quebrado, etc
+            throw new ModelNotLoadedException(
+                    "Modelo de ML não carregado ou resposta inválida"
+            );
         }
     }
 
@@ -77,8 +96,11 @@ public class FlightPredictionService {
     }
 
     private String mapAirlineCode(String companhiaInput) {
-        if (companhiaInput == null)
-            return "XX";
+
+        if (companhiaInput == null || companhiaInput.isBlank()) {
+            throw new InvalidCarrierException("Companhia inválida");
+        }
+
         String input = companhiaInput.toUpperCase();
 
         // Mapeamento das principais cias brasileiras e americanas
@@ -95,8 +117,8 @@ public class FlightPredictionService {
         if (input.contains("DELTA"))
             return "DL";
 
-        // Fallback: tenta pegar os 2 primeiros chars
-        return input.length() > 2 ? input.substring(0, 2) : input;
+        // Nenhuma regra bateu → companhia inválida
+        throw new InvalidCarrierException("Companhia inválida: " + companhiaInput);
     }
 
     private PredictionResponse mapToPredictionResponse(DataScienceResponse dsResponse) {

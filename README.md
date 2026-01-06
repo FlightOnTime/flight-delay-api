@@ -315,12 +315,12 @@ src/main/java/com/flightontime/flightontime/
 
 ## 📝 Licença
 
-Este projeto foi desenvolvido para o Hackathon NoDelayFlight.
+Este projeto foi desenvolvido para o Hackathon FlightOnTime.
 
 ---
 
 <div align="center">
 
-**Desenvolvido com ☕ e ✈️ pela Equipe FlightOnTime**
+**Desenvolvido com ☕ e ✈️ pela Equipe NoDelayFlight**
 
 </div>

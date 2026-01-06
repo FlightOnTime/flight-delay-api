@@ -1,0 +1,34 @@
+{
+  "numericas": [
+    "Month",
+    "DayOfWeek",
+    "dephour",
+    "is_weekend",
+    "quarter",
+    "Distance",
+    "origin_delay_rate",
+    "carrier_delay_rate",
+    "origin_traffic"
+  ],
+  "categoricas": [
+    "Airline",
+    "Origin",
+    "Dest",
+    "time_of_day"
+  ],
+  "todas": [
+    "Month",
+    "DayOfWeek",
+    "dephour",
+    "is_weekend",
+    "quarter",
+    "Distance",
+    "origin_delay_rate",
+    "carrier_delay_rate",
+    "origin_traffic",
+    "Airline",
+    "Origin",
+    "Dest",
+    "time_of_day"
+  ]
+}

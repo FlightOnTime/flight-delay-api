@@ -7,29 +7,44 @@ import com.flightontime.flightontime.api.dto.response.PredictionResponse;
 import com.flightontime.flightontime.api.exception.InvalidCarrierException;
 import com.flightontime.flightontime.api.exception.MlServiceUnavailableException;
 import com.flightontime.flightontime.api.exception.ModelNotLoadedException;
+
+import com.flightontime.flightontime.domain.model.PredictionHistory;
+import com.flightontime.flightontime.domain.repository.PredictionHistoryRepository;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+
+import java.time.LocalDateTime;
 
 @Service
 public class FlightPredictionService {
 
     private final RestTemplate restTemplate;
+    private final PredictionHistoryRepository historyRepository;
 
     // Pega a URL do application.properties
     @Value("${ml.api.base-url:http://127.0.0.1:8000}")
     private String dsApiUrl;
 
-    public FlightPredictionService(RestTemplate restTemplate) {
+    public FlightPredictionService(
+            RestTemplate restTemplate,
+            PredictionHistoryRepository historyRepository
+    ) {
         this.restTemplate = restTemplate;
+        this.historyRepository = historyRepository;
     }
 
     public PredictionResponse predict(PredictionRequest request) {
+
+        long startTime = System.currentTimeMillis(); // ⏱️ mede tempo de resposta
+
         DataScienceRequest dsRequest = convertToDsRequest(request);
         String url = dsApiUrl + "/predict";
 
@@ -54,10 +69,51 @@ public class FlightPredictionService {
                 throw new ModelNotLoadedException("Resposta vazia do modelo de ML");
             }
 
-            return mapToPredictionResponse(dsResponse);
+            PredictionResponse response = mapToPredictionResponse(dsResponse);
+
+            long endTime = System.currentTimeMillis();
+            double responseTimeMs = endTime - startTime;
+
+            // 🔹 SALVA HISTÓRICO DE SUCESSO
+            PredictionHistory history = new PredictionHistory();
+            history.setCompanhiaAerea(request.getCompanhia());
+            history.setOrigemAeroporto(request.getOrigemAeroporto());
+            history.setDestinoAeroporto(request.getDestinoAeroporto());
+            history.setDataPartida(request.getDataPartida());
+            history.setDiaDaSemana(request.getDataPartida().getDayOfWeek().name());
+
+            history.setAtrasoPrevisto(response.getPredicao() == 1);
+            history.setProbabilidadeAtraso(response.getProbabilidade());
+
+            history.setModeloVersao("v1"); // pode ser dinâmico no futuro
+            history.setTempoRespostaMs(responseTimeMs);
+
+            history.setStatus(true);
+            history.setRequestAt(LocalDateTime.now());
+
+            historyRepository.save(history);
+
+            return response;
 
         } catch (ResourceAccessException e) {
+
+            long endTime = System.currentTimeMillis();
+
             // ML fora do ar, timeout, conexão recusada
+            // 🔹 SALVA HISTÓRICO DE FALHA
+            PredictionHistory history = new PredictionHistory();
+            history.setCompanhiaAerea(request.getCompanhia());
+            history.setOrigemAeroporto(request.getOrigemAeroporto());
+            history.setDestinoAeroporto(request.getDestinoAeroporto());
+            history.setDataPartida(request.getDataPartida());
+            history.setDiaDaSemana(request.getDataPartida().getDayOfWeek().name());
+
+            history.setStatus(false);
+            history.setTempoRespostaMs((double) (endTime - startTime));
+            history.setRequestAt(LocalDateTime.now());
+
+            historyRepository.save(history);
+
             throw new MlServiceUnavailableException("Serviço de ML indisponível");
 
         } catch (InvalidCarrierException e) {

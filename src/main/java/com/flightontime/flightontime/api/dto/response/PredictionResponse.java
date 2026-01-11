@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,6 +23,9 @@ public class PredictionResponse {
     @JsonProperty("mensagem")
     private String mensagem;
 
+    @JsonProperty("explicacoes")
+    private List<String> explicacoes; // (Explicabilidade)
+
     @JsonProperty("metricas_internas")
     private InternalMetrics metricasInternas;
 
@@ -29,6 +34,7 @@ public class PredictionResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class InternalMetrics {
+
         @JsonProperty("risco_historico_origem")
         private Double riscoHistoricoOrigem;
 

@@ -2,7 +2,6 @@ package com.flightontime.flightontime.domain.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -14,7 +13,7 @@ public class PredictionHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "companhia_aerea", nullable = false)
+    @Column(name = "companhia", nullable = false)
     private String companhiaAerea;
 
     @Column(name = "origem_aeroporto", nullable = false)
@@ -26,14 +25,23 @@ public class PredictionHistory {
     @Column(name = "data_partida", nullable = false)
     private LocalDateTime dataPartida;
 
+    @Column(name = "distancia_km", nullable = false)
+    private Double distanciaKm;
+
+    @Column(name = "previsao", nullable = false)
+    private String previsao;
+
+    @Column(name = "probabilidade_atraso", nullable = false)
+    private Double probabilidadeAtraso;
+
+    @Column(name = "confianca")
+    private String confianca;
+
     @Column(name = "dia_da_semana")
     private String diaDaSemana;
 
     @Column(name = "atraso_previsto", nullable = false)
     private Boolean atrasoPrevisto;
-
-    @Column(name = "probabilidade_atraso", nullable = false)
-    private Double probabilidadeAtraso;
 
     @Column(name = "modelo_versao")
     private String modeloVersao;
@@ -44,6 +52,15 @@ public class PredictionHistory {
     @Column(nullable = false)
     private Boolean status;
 
-    @Column(name = "request_at", nullable = false)
+    @Column(name = "request_at")
     private LocalDateTime requestAt;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        if (this.requestAt == null) this.requestAt = LocalDateTime.now();
+    }
 }

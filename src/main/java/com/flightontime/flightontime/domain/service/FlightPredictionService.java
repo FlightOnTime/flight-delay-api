@@ -7,7 +7,6 @@ import com.flightontime.flightontime.api.dto.response.PredictionResponse;
 import com.flightontime.flightontime.api.exception.InvalidCarrierException;
 import com.flightontime.flightontime.api.exception.MlServiceUnavailableException;
 import com.flightontime.flightontime.api.exception.ModelNotLoadedException;
-
 import com.flightontime.flightontime.domain.model.PredictionHistory;
 import com.flightontime.flightontime.domain.repository.PredictionHistoryRepository;
 
@@ -22,6 +21,8 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class FlightPredictionService {
@@ -50,11 +51,8 @@ public class FlightPredictionService {
 
         try {
             // 1. Pega a resposta como String Pura para não falhar no parse automático
-            ResponseEntity<String> rawResponse = restTemplate.postForEntity(url, dsRequest, String.class);
-
-            // 2. LOGA O QUE VEIO (Isso vai revelar o erro se persistir)
-            System.out.println("🔍 STATUS PYTHON: " + rawResponse.getStatusCode());
-            System.out.println("📦 BODY PYTHON: " + rawResponse.getBody());
+            ResponseEntity<String> rawResponse =
+                    restTemplate.postForEntity(url, dsRequest, String.class);
 
             // 3. Tenta converter manualmente com suporte a NaN
             ObjectMapper mapper = JsonMapper.builder()
@@ -64,15 +62,14 @@ public class FlightPredictionService {
             DataScienceResponse dsResponse =
                     mapper.readValue(rawResponse.getBody(), DataScienceResponse.class);
 
-            // Se o Python respondeu algo inválido ou vazio
             if (dsResponse == null) {
                 throw new ModelNotLoadedException("Resposta vazia do modelo de ML");
             }
 
-            PredictionResponse response = mapToPredictionResponse(dsResponse);
+            PredictionResponse response =
+                    mapToPredictionResponse(dsResponse, request);
 
             long endTime = System.currentTimeMillis();
-            double responseTimeMs = endTime - startTime;
 
             // 🔹 SALVA HISTÓRICO DE SUCESSO
             PredictionHistory history = new PredictionHistory();
@@ -80,25 +77,23 @@ public class FlightPredictionService {
             history.setOrigemAeroporto(request.getOrigemAeroporto());
             history.setDestinoAeroporto(request.getDestinoAeroporto());
             history.setDataPartida(request.getDataPartida());
+            
+            history.setDistanciaKm(request.getDistanciaKm()); 
+            history.setPrevisao(dsResponse.getPrediction());
+            history.setConfianca(dsResponse.getMessage());
             history.setDiaDaSemana(request.getDataPartida().getDayOfWeek().name());
-
             history.setAtrasoPrevisto(response.getPredicao() == 1);
             history.setProbabilidadeAtraso(response.getProbabilidade());
-
-            history.setModeloVersao("v1"); // pode ser dinâmico no futuro
-            history.setTempoRespostaMs(responseTimeMs);
-
+            history.setModeloVersao("v1"); 
+            history.setTempoRespostaMs((double) (endTime - startTime));
             history.setStatus(true);
             history.setRequestAt(LocalDateTime.now());
 
-            historyRepository.save(history);
+            historyRepository.save(history); 
 
             return response;
 
         } catch (ResourceAccessException e) {
-
-            long endTime = System.currentTimeMillis();
-
             // ML fora do ar, timeout, conexão recusada
             // 🔹 SALVA HISTÓRICO DE FALHA
             PredictionHistory history = new PredictionHistory();
@@ -107,25 +102,89 @@ public class FlightPredictionService {
             history.setDestinoAeroporto(request.getDestinoAeroporto());
             history.setDataPartida(request.getDataPartida());
             history.setDiaDaSemana(request.getDataPartida().getDayOfWeek().name());
-
             history.setStatus(false);
-            history.setTempoRespostaMs((double) (endTime - startTime));
+            history.setTempoRespostaMs(0.0);
             history.setRequestAt(LocalDateTime.now());
 
             historyRepository.save(history);
 
             throw new MlServiceUnavailableException("Serviço de ML indisponível");
 
-        } catch (InvalidCarrierException e) {
-            // Companhia inválida: deixa o handler global tratar
-            throw e;
-
         } catch (Exception e) {
             // Erro de parse, resposta inválida, NaN quebrado, etc
-            throw new ModelNotLoadedException(
-                    "Modelo de ML não carregado ou resposta inválida"
+            throw new ModelNotLoadedException("Modelo de ML não carregado ou resposta inválida");
+        }
+    }
+
+    /* ===========================
+        EXPLICABILIDADE (CORE)
+       =========================== */
+    private List<String> gerarExplicacoes(
+            PredictionRequest request,
+            DataScienceResponse dsResponse
+    ) {
+        List<String> explicacoes = new ArrayList<>();
+
+        // 1. Adiciona explicações que vieram diretamente do Modelo de ML (Python)
+        if (dsResponse.getExplanations() != null) {
+            explicacoes.addAll(dsResponse.getExplanations());
+        }
+
+        // 2. Lógica local de apoio (Regras de negócio Java)
+        int hour = request.getDataPartida().getHour();
+        if (hour >= 15 && hour <= 22) {
+            explicacoes.add("Horário da tarde/noite aumenta o risco de atraso");
+        }
+
+        if (dsResponse.getInternalMetrics() != null) {
+            if (dsResponse.getInternalMetrics().getHistoricalOriginRisk() != null &&
+                dsResponse.getInternalMetrics().getHistoricalOriginRisk() > 0.20) {
+                explicacoes.add("Aeroporto de origem possui histórico elevado de atrasos");
+            }
+
+            if (dsResponse.getInternalMetrics().getHistoricalCarrierRisk() != null &&
+                dsResponse.getInternalMetrics().getHistoricalCarrierRisk() > 0.15) {
+                explicacoes.add("Companhia aérea apresenta risco histórico relevante de atraso");
+            }
+        }
+
+        if (explicacoes.isEmpty()) {
+            explicacoes.add("Não foram identificados fatores críticos relevantes");
+        }
+
+        return explicacoes;
+    }
+
+    /* ===========================
+        MAPEAMENTOS
+       =========================== */
+    private PredictionResponse mapToPredictionResponse(
+            DataScienceResponse dsResponse,
+            PredictionRequest request
+    ) {
+        PredictionResponse response = new PredictionResponse();
+
+        // Converte a String do Python para o Integer esperado pelo Front-End (0 ou 1)
+        Integer predicao = "Pontual".equalsIgnoreCase(dsResponse.getPrediction()) ? 0 : 1;
+
+        response.setPredicao(predicao);
+        response.setProbabilidade(dsResponse.getProbability());
+        response.setMensagem(dsResponse.getMessage());
+        
+        // Vincula as explicações (API + Local)
+        response.setExplicacoes(gerarExplicacoes(request, dsResponse));
+
+        if (dsResponse.getInternalMetrics() != null) {
+            response.setMetricasInternas(
+                    PredictionResponse.InternalMetrics.builder()
+                            .riscoHistoricoOrigem(dsResponse.getInternalMetrics().getHistoricalOriginRisk())
+                            .riscoHistoricoCompanhia(dsResponse.getInternalMetrics().getHistoricalCarrierRisk())
+                            .fonte(dsResponse.getInternalMetrics().getSource())
+                            .build()
             );
         }
+
+        return response;
     }
 
     private DataScienceRequest convertToDsRequest(PredictionRequest req) {
@@ -138,9 +197,10 @@ public class FlightPredictionService {
 
         // Extrai a parte da DATA (yyyy-MM-dd) do LocalDateTime
         ds.setFlightDate(req.getDataPartida().toLocalDate().toString());
-
+        
         // Conversão de Data e Hora
         ds.setDayOfWeek(req.getDataPartida().getDayOfWeek().getValue());
+
         int hour = req.getDataPartida().getHour();
         int minute = req.getDataPartida().getMinute();
         ds.setCrsDepTime(hour * 100 + minute); // Ex: 14:30 -> 1430
@@ -152,7 +212,6 @@ public class FlightPredictionService {
     }
 
     private String mapAirlineCode(String companhiaInput) {
-
         if (companhiaInput == null || companhiaInput.isBlank()) {
             throw new InvalidCarrierException("Companhia inválida");
         }
@@ -160,48 +219,13 @@ public class FlightPredictionService {
         String input = companhiaInput.toUpperCase();
 
         // Mapeamento das principais cias brasileiras e americanas
-        if (input.contains("LATAM"))
-            return "LA";
-        if (input.contains("GOL"))
-            return "G3";
-        if (input.contains("AZUL"))
-            return "AD";
-        if (input.contains("AMERICAN"))
-            return "AA";
-        if (input.contains("UNITED"))
-            return "UA";
-        if (input.contains("DELTA"))
-            return "DL";
+        if (input.contains("LATAM")) return "LA";
+        if (input.contains("GOL")) return "G3";
+        if (input.contains("AZUL")) return "AD";
+        if (input.contains("AMERICAN")) return "AA";
+        if (input.contains("UNITED")) return "UA";
+        if (input.contains("DELTA")) return "DL";
 
-        // Nenhuma regra bateu → companhia inválida
         throw new InvalidCarrierException("Companhia inválida: " + companhiaInput);
-    }
-
-    private PredictionResponse mapToPredictionResponse(DataScienceResponse dsResponse) {
-        if (dsResponse == null)
-            return null;
-
-        PredictionResponse response = new PredictionResponse();
-
-        // Converte a String do Python para o Integer esperado pelo Front-End (0 ou 1)
-        String predStr = dsResponse.getPrediction() != null ? dsResponse.getPrediction() : "";
-        Integer predInt = predStr.equalsIgnoreCase("Pontual") ? 0 : 1;
-        response.setPredicao(predInt);
-
-        response.setProbabilidade(dsResponse.getProbability() != null ? dsResponse.getProbability() : 0.0);
-        response.setMensagem(
-                dsResponse.getMessage() != null ? dsResponse.getMessage() : dsResponse.getRecommendation());
-
-        if (dsResponse.getInternalMetrics() != null) {
-            PredictionResponse.InternalMetrics metrics = new PredictionResponse.InternalMetrics();
-
-            metrics.setRiscoHistoricoOrigem(dsResponse.getInternalMetrics().getHistoricalOriginRisk());
-            metrics.setRiscoHistoricoCompanhia(dsResponse.getInternalMetrics().getHistoricalCarrierRisk());
-            metrics.setFonte(dsResponse.getInternalMetrics().getSource());
-
-            response.setMetricasInternas(metrics);
-        }
-
-        return response;
     }
 }

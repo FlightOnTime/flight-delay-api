@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class DataScienceResponse {
 
     @JsonProperty("prediction")
-    private String prediction; // Mudado para String porque o Python retorna "Pontual" ou "Atraso"
+    private String prediction; 
 
     @JsonProperty("probability")
     @com.fasterxml.jackson.annotation.JsonAlias("probability_delay")
@@ -26,6 +28,9 @@ public class DataScienceResponse {
 
     @JsonProperty("recommendation")
     private String recommendation;
+
+    @JsonProperty("explanations")
+    private List<String> explanations;
 
     @JsonProperty("internal_metrics")
     private InternalMetrics internalMetrics;

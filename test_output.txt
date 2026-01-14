@@ -1,0 +1,61 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.flightontime:flightontime >--------------------
+[INFO] Building flightontime 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ flightontime ---
+[INFO] Deleting F:\Meus_Projetos\hackathon\Back-End\flight-delay-api\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ flightontime ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 7 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ flightontime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 23 source files with javac [debug parameters release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ flightontime ---
+[INFO] skip non existing resourceDirectory F:\Meus_Projetos\hackathon\Back-End\flight-delay-api\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ flightontime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 2 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ flightontime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.flightontime.flightontime.domain.service.StatsServiceTest
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+16:36:08.974 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimos 7 dias
+16:36:09.004 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 1000 previsões, taxa atraso 42.00%
+16:36:09.090 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimas 24 horas
+16:36:09.092 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 1000 previsões, taxa atraso 42.00%
+16:36:09.107 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimas 24 horas
+16:36:09.108 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 1000 previsões, taxa atraso 42.00%
+16:36:09.120 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimas 24 horas
+16:36:09.122 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 1000 previsões, taxa atraso 42.00%
+16:36:09.143 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimas 24 horas
+16:36:09.146 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 0 previsões, taxa atraso 0%
+16:36:09.164 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimas 24 horas
+16:36:09.165 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 1000 previsões, taxa atraso 42.00%
+16:36:09.191 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimos 30 dias
+16:36:09.195 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 1000 previsões, taxa atraso 42.00%
+16:36:09.207 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Calculando estatísticas para período: Últimas 24 horas
+16:36:09.208 [main] INFO com.flightontime.flightontime.domain.service.StatsService -- Estatísticas calculadas: 1000 previsões, taxa atraso 42.00%
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.002 s -- in com.flightontime.flightontime.domain.service.StatsServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  27.936 s
+[INFO] Finished at: 2026-01-07T16:36:09-03:00
+[INFO] ------------------------------------------------------------------------

@@ -1,0 +1,95 @@
+# =============================================================================
+#  FLIGHT ON TIME API - SUÍTE DE TESTES (MVP V2.1)
+# =============================================================================
+#  Objetivo: Validar a integração Back-End Java <-> Data Science Python
+#  Autor: FlightOnTime Team
+#  Data: 2026-01-04
+# =============================================================================
+
+### ⚙️ CONFIGURAÇÃO DE AMBIENTE
+@baseUrl = http://localhost:8080/api/v1
+@contentType = application/json
+
+# =============================================================================
+#  1. HEALTH CHECK (MONITORAMENTO)
+# =============================================================================
+# Verifica se o Back-End Java subiu corretamente e o Controller está ativo.
+# Esperado: 200 OK com mensagem "FlightOnTime API (MVP Backend) - Online ✈️"
+
+GET {{baseUrl}}/health
+Accept: {{contentType}}
+
+###
+
+# =============================================================================
+#  2. CENÁRIO DE SUCESSO: VOO PONTUAL (ON TIME)
+# =============================================================================
+# Testa um voo da DELTA (DL) em uma rota padrão, num horário comercial.
+# Cenário ideal para validação de fluxo.
+
+POST {{baseUrl}}/predict
+Content-Type: {{contentType}}
+
+{
+    "companhia": "DELTA", 
+    "origem_aeroporto": "ATL",
+    "destino_aeroporto": "LAX",
+    "data_partida": "2026-03-15T10:00:00",
+    "distancia_km": 3100.0
+}
+
+###
+
+# =============================================================================
+#  3. CENÁRIO DE RISCO: ALTA PROBABILIDADE DE ATRASO
+# =============================================================================
+# Simula um voo com características de risco (horário de pico, rota congestionada).
+# Testa se o modelo responde com predicao=1 (Atraso).
+
+POST {{baseUrl}}/predict
+Content-Type: {{contentType}}
+
+{
+    "companhia": "UNITED",
+    "origem_aeroporto": "JFK",
+    "destino_aeroporto": "ORD",
+    "data_partida": "2026-12-24T19:30:00",
+    "distancia_km": 1190.0
+}
+
+###
+
+# =============================================================================
+#  4. VALIDAÇÃO DE ENTRADA: CAMPOS OBRIGATÓRIOS
+# =============================================================================
+# Envia um payload incompleto (sem data) para testar o @Valid do Spring.
+# Esperado: 400 Bad Request (Validation Error)
+
+POST {{baseUrl}}/predict
+Content-Type: {{contentType}}
+
+{
+    "companhia": "LATAM",
+    "origem_aeroporto": "GRU",
+    "destino_aeroporto": "MIA",
+    "distancia_km": 6000.5
+}
+
+###
+
+# =============================================================================
+#  5. VALIDAÇÃO DE REGRA DE NEGÓCIO: DISTÂNCIA NEGATIVA
+# =============================================================================
+# Envia uma distância inválida.
+# Esperado: 400 Bad Request
+
+POST {{baseUrl}}/predict
+Content-Type: {{contentType}}
+
+{
+    "companhia": "AZUL",
+    "origem_aeroporto": "VCP",
+    "destino_aeroporto": "LIS",
+    "data_partida": "2026-05-10T22:00:00",
+    "distancia_km": -100.0
+}

@@ -15,7 +15,7 @@ O **FlightOnTime API** é uma API REST de alta performance focada em **inferênc
 
 ### 🎯 Arquitetura de Persistência
 
-Diferente do MVP inicial, a versão atual implementa persistência de dados para auditoria e melhoria contínua do modelo:
+Diferente do MVP inicial, a versão **v1.0** implementa persistência de dados para auditoria e melhoria contínua do modelo:
 
 | Recurso | Descrição |
 |---------|-----------|
@@ -87,11 +87,11 @@ mvn test
 http://localhost:8080/api/v1
 ```
 
-### 1. Predição de Atraso
+### 1. Predição de Atraso (Single)
 
 **`POST /api/v1/predict`**
 
-Realiza a inferência preditiva consumindo o modelo de Machine Learning.
+Realiza a inferência preditiva para um único voo consumindo o modelo de Machine Learning.
 
 #### Request Body
 
@@ -124,16 +124,55 @@ Realiza a inferência preditiva consumindo o modelo de Machine Learning.
 }
 ```
 
-| Campo           | Tipo      | Descrição                                 |
-| --------------- | --------- | ----------------------------------------- |
-| `predicao`      | `integer` | `0` = Pontual, `1` = Atraso Previsto      |
-| `probabilidade` | `number`  | Confiança da predição (0.0 a 1.0)         |
-| `mensagem`      | `string`  | Recomendação prescritiva para o usuário   |
-| `explicacoes`   | `array`   | Fatores que contribuíram para a predição  |
+### 2. Predição de Atraso em Lote (Batch)
+
+**`POST /api/v1/predict/batch`**
+
+Realiza a inferência preditiva para múltiplos voos em uma única requisição. Ideal para processamento em massa e otimização de chamadas de rede.
+
+#### Request Body (Lista de JSON)
+
+```json
+[
+  {
+    "companhia": "LATAM",
+    "origem_aeroporto": "GRU",
+    "destino_aeroporto": "JFK",
+    "data_partida": "2026-01-15T14:30:00",
+    "distancia_km": 7600.0
+  },
+  {
+    "companhia": "GOL",
+    "origem_aeroporto": "BSB",
+    "destino_aeroporto": "MIA",
+    "data_partida": "2026-02-20T08:00:00",
+    "distancia_km": 5800.0
+  }
+]
+```
+
+#### Response Body (200 OK - Lista de Resultados)
+
+```json
+[
+  {
+    "predicao": 0,
+    "probabilidade": 0.05,
+    "mensagem": "Voo com alta probabilidade de ser Pontual.",
+    "explicacoes": ["Horário favorável"]
+  },
+  {
+    "predicao": 1,
+    "probabilidade": 0.89,
+    "mensagem": "Alerta: Probabilidade de atraso detectada.",
+    "explicacoes": ["Condições climáticas históricas adversas"]
+  }
+]
+```
 
 ---
 
-### 2. Health Check
+### 3. Health Check
 
 **`GET /api/v1/health`**
 
@@ -142,12 +181,12 @@ Endpoint para verificação de saúde da aplicação (readiness probe).
 #### Response (200 OK)
 
 ```
-FlightOnTime API (MVP Backend) - Online ✈️
+FlightOnTime API (v1.0 Backend) - Online ✈️
 ```
 
 ---
 
-### 3. Documentação Interativa (Swagger UI)
+### 4. Documentação Interativa (Swagger UI)
 
 **`GET /swagger-ui.html`**
 
@@ -256,3 +295,4 @@ O `FlightPredictionService` realiza transformações críticas entre formatos:
 **Desenvolvido com ☕ e ✈️ pela Equipe NoDelayFlight**
 
 </div>
+```

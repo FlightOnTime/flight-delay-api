@@ -36,8 +36,7 @@ public class FlightPredictionService {
 
     public FlightPredictionService(
             RestTemplate restTemplate,
-            PredictionHistoryRepository historyRepository
-    ) {
+            PredictionHistoryRepository historyRepository) {
         this.restTemplate = restTemplate;
         this.historyRepository = historyRepository;
     }
@@ -51,23 +50,20 @@ public class FlightPredictionService {
 
         try {
             // 1. Pega a resposta como String Pura para não falhar no parse automático
-            ResponseEntity<String> rawResponse =
-                    restTemplate.postForEntity(url, dsRequest, String.class);
+            ResponseEntity<String> rawResponse = restTemplate.postForEntity(url, dsRequest, String.class);
 
             // 3. Tenta converter manualmente com suporte a NaN
             ObjectMapper mapper = JsonMapper.builder()
                     .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
                     .build();
 
-            DataScienceResponse dsResponse =
-                    mapper.readValue(rawResponse.getBody(), DataScienceResponse.class);
+            DataScienceResponse dsResponse = mapper.readValue(rawResponse.getBody(), DataScienceResponse.class);
 
             if (dsResponse == null) {
                 throw new ModelNotLoadedException("Resposta vazia do modelo de ML");
             }
 
-            PredictionResponse response =
-                    mapToPredictionResponse(dsResponse, request);
+            PredictionResponse response = mapToPredictionResponse(dsResponse, request);
 
             long endTime = System.currentTimeMillis();
 
@@ -77,19 +73,19 @@ public class FlightPredictionService {
             history.setOrigemAeroporto(request.getOrigemAeroporto());
             history.setDestinoAeroporto(request.getDestinoAeroporto());
             history.setDataPartida(request.getDataPartida());
-            
-            history.setDistanciaKm(request.getDistanciaKm()); 
+
+            history.setDistanciaKm(request.getDistanciaKm());
             history.setPrevisao(dsResponse.getPrediction());
             history.setConfianca(dsResponse.getMessage());
             history.setDiaDaSemana(request.getDataPartida().getDayOfWeek().name());
             history.setAtrasoPrevisto(response.getPredicao() == 1);
             history.setProbabilidadeAtraso(response.getProbabilidade());
-            history.setModeloVersao("v1"); 
+            history.setModeloVersao("v1");
             history.setTempoRespostaMs((double) (endTime - startTime));
             history.setStatus(true);
             history.setRequestAt(LocalDateTime.now());
 
-            historyRepository.save(history); 
+            historyRepository.save(history);
 
             return response;
 
@@ -101,12 +97,21 @@ public class FlightPredictionService {
             history.setOrigemAeroporto(request.getOrigemAeroporto());
             history.setDestinoAeroporto(request.getDestinoAeroporto());
             history.setDataPartida(request.getDataPartida());
+            history.setDistanciaKm(request.getDistanciaKm()); // Correção: Campo obrigatório
+            history.setPrevisao("No Horário"); // Valor padrão para respeitar a constraint do banco
+            history.setProbabilidadeAtraso(0.0);
+            history.setAtrasoPrevisto(false);
             history.setDiaDaSemana(request.getDataPartida().getDayOfWeek().name());
             history.setStatus(false);
             history.setTempoRespostaMs(0.0);
             history.setRequestAt(LocalDateTime.now());
 
-            historyRepository.save(history);
+            try {
+                historyRepository.save(history);
+            } catch (Exception dbEx) {
+                // Logar mas não deixar derrubar a resposta original de 503
+                System.err.println("Erro ao salvar histórico de falha: " + dbEx.getMessage());
+            }
 
             throw new MlServiceUnavailableException("Serviço de ML indisponível");
 
@@ -116,13 +121,14 @@ public class FlightPredictionService {
         }
     }
 
-    /* ===========================
-        EXPLICABILIDADE (CORE)
-       =========================== */
+    /*
+     * ===========================
+     * EXPLICABILIDADE (CORE)
+     * ===========================
+     */
     private List<String> gerarExplicacoes(
             PredictionRequest request,
-            DataScienceResponse dsResponse
-    ) {
+            DataScienceResponse dsResponse) {
         List<String> explicacoes = new ArrayList<>();
 
         // 1. Adiciona explicações que vieram diretamente do Modelo de ML (Python)
@@ -138,12 +144,12 @@ public class FlightPredictionService {
 
         if (dsResponse.getInternalMetrics() != null) {
             if (dsResponse.getInternalMetrics().getHistoricalOriginRisk() != null &&
-                dsResponse.getInternalMetrics().getHistoricalOriginRisk() > 0.20) {
+                    dsResponse.getInternalMetrics().getHistoricalOriginRisk() > 0.20) {
                 explicacoes.add("Aeroporto de origem possui histórico elevado de atrasos");
             }
 
             if (dsResponse.getInternalMetrics().getHistoricalCarrierRisk() != null &&
-                dsResponse.getInternalMetrics().getHistoricalCarrierRisk() > 0.15) {
+                    dsResponse.getInternalMetrics().getHistoricalCarrierRisk() > 0.15) {
                 explicacoes.add("Companhia aérea apresenta risco histórico relevante de atraso");
             }
         }
@@ -155,13 +161,14 @@ public class FlightPredictionService {
         return explicacoes;
     }
 
-    /* ===========================
-        MAPEAMENTOS
-       =========================== */
+    /*
+     * ===========================
+     * MAPEAMENTOS
+     * ===========================
+     */
     private PredictionResponse mapToPredictionResponse(
             DataScienceResponse dsResponse,
-            PredictionRequest request
-    ) {
+            PredictionRequest request) {
         PredictionResponse response = new PredictionResponse();
 
         // Converte a String do Python para o Integer esperado pelo Front-End (0 ou 1)
@@ -170,7 +177,7 @@ public class FlightPredictionService {
         response.setPredicao(predicao);
         response.setProbabilidade(dsResponse.getProbability());
         response.setMensagem(dsResponse.getMessage());
-        
+
         // Vincula as explicações (API + Local)
         response.setExplicacoes(gerarExplicacoes(request, dsResponse));
 
@@ -180,8 +187,7 @@ public class FlightPredictionService {
                             .riscoHistoricoOrigem(dsResponse.getInternalMetrics().getHistoricalOriginRisk())
                             .riscoHistoricoCompanhia(dsResponse.getInternalMetrics().getHistoricalCarrierRisk())
                             .fonte(dsResponse.getInternalMetrics().getSource())
-                            .build()
-            );
+                            .build());
         }
 
         return response;
@@ -197,7 +203,7 @@ public class FlightPredictionService {
 
         // Extrai a parte da DATA (yyyy-MM-dd) do LocalDateTime
         ds.setFlightDate(req.getDataPartida().toLocalDate().toString());
-        
+
         // Conversão de Data e Hora
         ds.setDayOfWeek(req.getDataPartida().getDayOfWeek().getValue());
 
@@ -219,12 +225,20 @@ public class FlightPredictionService {
         String input = companhiaInput.toUpperCase();
 
         // Mapeamento das principais cias brasileiras e americanas
-        if (input.contains("LATAM")) return "LA";
-        if (input.contains("GOL")) return "G3";
-        if (input.contains("AZUL")) return "AD";
-        if (input.contains("AMERICAN")) return "AA";
-        if (input.contains("UNITED")) return "UA";
-        if (input.contains("DELTA")) return "DL";
+        if (input.contains("LATAM"))
+            return "LA";
+        if (input.contains("GOL"))
+            return "G3";
+        if (input.contains("AZUL"))
+            return "AD";
+        if (input.contains("AMERICAN"))
+            return "AA";
+        if (input.contains("UNITED"))
+            return "UA";
+        if (input.contains("DELTA"))
+            return "DL";
+        if (input.contains("SOUTHWEST"))
+            return "WN";
 
         throw new InvalidCarrierException("Companhia inválida: " + companhiaInput);
     }

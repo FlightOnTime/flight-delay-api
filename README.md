@@ -3,27 +3,26 @@
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Status](https://img.shields.io/badge/Status-MVP-blueviolet?style=for-the-badge)
+![JUnit 5](https://img.shields.io/badge/Tests-JUnit5%20%2B%20H2-green?style=for-the-badge&logo=junit5&logoColor=white)
 
 ---
 
 ## 📋 Sobre o Projeto
 
-O **FlightOnTime API** é uma API REST de alta performance focada em **inferência preditiva em tempo real** para atrasos de voos. A aplicação atua como camada de orquestração entre o cliente (Front-end/Mobile) e o serviço de Machine Learning (Python/FastAPI), processando requisições, validando dados e formatando respostas de forma padronizada.
+O **FlightOnTime API** é uma API REST de alta performance focada em **inferência preditiva em tempo real** para atrasos de voos. A aplicação atua como camada de orquestração entre o cliente (Front-end/Mobile) e o serviço de Machine Learning (Python/FastAPI), processando requisições, validando dados e persistindo o histórico de predições.
 
-### 🎯 Decisão Arquitetural: Stateless (Sem Banco de Dados)
+### 🎯 Arquitetura de Persistência
 
-A arquitetura foi deliberadamente projetada como **Stateless** para o MVP. Esta decisão técnica se fundamenta em:
+Diferente do MVP inicial, a versão atual implementa persistência de dados para auditoria e melhoria contínua do modelo:
 
-| Princípio                            | Benefício                                                                       |
-| ------------------------------------ | ------------------------------------------------------------------------------- |
-| **Baixa Latência**                   | Sem overhead de I/O de banco, a API processa requisições em milissegundos       |
-| **Escalabilidade Horizontal**        | Qualquer instância pode processar qualquer requisição sem dependência de estado |
-| **Simplicidade Operacional (YAGNI)** | Menor superfície de ataque, menos pontos de falha, deploy simplificado          |
-| **Foco no Core**                     | 100% dos recursos dedicados à inferência preditiva, não à persistência          |
-
-> **Nota:** A infraestrutura de banco (PostgreSQL/Flyway) está pré-configurada para evolução futura (logs de auditoria, persistência de predições), mas não é utilizada no fluxo crítico do MVP.
+| Recurso | Descrição |
+|---------|-----------|
+| **PostgreSQL** | Banco de dados oficial para produção e desenvolvimento local (via Docker). |
+| **H2 Database** | Banco de dados em memória utilizado exclusivamente para o escopo de **testes**, garantindo isolamento e performance. |
+| **Flyway** | Gerenciamento de versionamento de banco de dados (Migrations). |
+| **Constraint de Status** | O sistema agora suporta e valida os status: `No Horário`, `Atrasado`, `Cancelado` e `Pontual`. |
 
 ---
 
@@ -39,15 +38,16 @@ graph LR
         B --> C[Controller]
         C --> D[Service Layer]
         D --> E[DTO Mapper]
+        D --> H[(PostgreSQL)]
     end
 
     E -->|HTTP POST| F[🐍 API Python - FastAPI]
-    F -->|Random Forest ML| G[(Modelo Treinado)]
+    F -->|ML Model| G[(Random Forest)]
     G --> F
     F -->|JSON Response| E
     E --> D
-    D --> C
-    C -->|JSON Response| A
+D --> C
+C -->|JSON Response| A
 ```
 
 ### Design Patterns Implementados
@@ -61,10 +61,28 @@ graph LR
 
 ---
 
+## 🧪 Testes Automatizados
+
+O projeto utiliza uma estratégia de testes em pirâmide para garantir a confiabilidade das predições.
+
+### Como Executar os Testes
+
+```bash
+# Executa todos os testes (Unitários e de Integração)
+mvn test
+```
+
+### Estrutura de Testes
+
+1.  **Testes Unitários (Services):** Implementados com **JUnit 5** e **Mockito**. Isolam a lógica de negócio, mockando o `RestTemplate` e o `PredictionHistoryRepository`.
+2.  **Testes de Integração (Controllers):** Utilizam **MockMvc** e **H2 Database**. Simulam o fluxo completo de uma requisição REST, validando a persistência real no banco de dados em memória.
+3.  **Ambiente Isolado:** O arquivo `src/test/resources/application-test.properties` garante que os testes não interfiram nos dados do PostgreSQL local/produção.
+
+---
+
 ## 📡 Endpoints (Documentação da API)
 
 ### Base URL
-
 ```
 http://localhost:8080/api/v1
 ```
@@ -81,9 +99,9 @@ Realiza a inferência preditiva consumindo o modelo de Machine Learning.
 {
   "companhia": "LATAM",
   "origem_aeroporto": "GRU",
-  "destino_aeroporto": "GIG",
+  "destino_aeroporto": "JFK",
   "data_partida": "2026-01-15T14:30:00",
-  "distancia_km": 450.0
+  "distancia_km": 7600.0
 }
 ```
 
@@ -95,30 +113,23 @@ Realiza a inferência preditiva consumindo o modelo de Machine Learning.
 | `data_partida`      | `datetime` | `@NotNull`             | Data e hora da partida (ISO 8601)   |
 | `distancia_km`      | `number`   | `@Positive`            | Distância do voo em quilômetros     |
 
-#### Response Body (Sucesso - 200 OK)
+#### Response Body (200 OK)
 
 ```json
 {
-  "predicao": 1,
-  "probabilidade": 0.73,
-  "mensagem": "Alta probabilidade de atraso. Considere chegar mais cedo.",
-  "metricas_internas": {
-    "risco_historico_origem": 0.45,
-    "risco_historico_companhia": 0.32,
-    "fonte": "random_forest_v2.1"
-  }
+  "predicao": 0,
+  "probabilidade": 0.05,
+  "mensagem": "Voo com alta probabilidade de ser Pontual.",
+  "explicacoes": ["Horário favorável", "Histórico positivo da companhia"]
 }
 ```
 
-| Campo                                         | Tipo      | Descrição                                 |
-| --------------------------------------------- | --------- | ----------------------------------------- |
-| `predicao`                                    | `integer` | `0` = Pontual, `1` = Atraso Previsto      |
-| `probabilidade`                               | `number`  | Confiança da predição (0.0 a 1.0)         |
-| `mensagem`                                    | `string`  | Recomendação prescritiva para o usuário   |
-| `metricas_internas`                           | `object`  | Dados para monitoramento de Concept Drift |
-| `metricas_internas.risco_historico_origem`    | `number`  | Risco histórico do aeroporto de origem    |
-| `metricas_internas.risco_historico_companhia` | `number`  | Risco histórico da companhia aérea        |
-| `metricas_internas.fonte`                     | `string`  | Versão do modelo utilizado                |
+| Campo           | Tipo      | Descrição                                 |
+| --------------- | --------- | ----------------------------------------- |
+| `predicao`      | `integer` | `0` = Pontual, `1` = Atraso Previsto      |
+| `probabilidade` | `number`  | Confiança da predição (0.0 a 1.0)         |
+| `mensagem`      | `string`  | Recomendação prescritiva para o usuário   |
+| `explicacoes`   | `array`   | Fatores que contribuíram para a predição  |
 
 ---
 
@@ -147,56 +158,29 @@ Interface interativa para explorar e testar a API.
 ## 🚀 Guia de Instalação e Execução
 
 ### Pré-requisitos
-
-- **Java 17+** (OpenJDK ou Oracle JDK)
+- **Java 17+**
 - **Maven 3.9+**
-- **API Python em execução** (porta 8000)
+- **Docker & Docker Compose** (para o PostgreSQL)
 
-### Instalação Rápida
+### Instalação e Execução
 
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/seu-usuario/flightontime-api.git
-cd flightontime-api
+# 1. Inicie a infraestrutura (PostgreSQL)
+docker-compose up -d postgres-db
 
-# 2. Compile o projeto
-mvn clean install -DskipTests
+# 2. Compile e execute os testes
+mvn clean test
 
 # 3. Execute a aplicação
 mvn spring-boot:run
 ```
 
-### Configuração de Variáveis de Ambiente
+### Configuração de Banco de Dados
+A aplicação espera um PostgreSQL rodando em `localhost:5432` com as credenciais padrão:
+- **DB:** `flightontime_db`
+- **User/Pass:** `postgres/postgres`
 
-A URL da API de Machine Learning deve ser configurada. Existem duas opções:
-
-**Opção 1: Via `application.properties`**
-
-```properties
-ml.api.base-url=http://127.0.0.1:8000
-```
-
-**Opção 2: Via Variável de Ambiente**
-
-```bash
-# Windows (PowerShell)
-$env:ML_API_BASE_URL="http://sua-api-python:8000"
-
-# Linux/Mac
-export ML_API_BASE_URL=http://sua-api-python:8000
-```
-
-### Verificação
-
-```bash
-# Health Check
-curl http://localhost:8080/api/v1/health
-
-# Teste de Predição
-curl -X POST http://localhost:8080/api/v1/predict \
-  -H "Content-Type: application/json" \
-  -d '{"companhia":"GOL","origem_aeroporto":"GRU","destino_aeroporto":"CGH","data_partida":"2026-01-20T10:00:00","distancia_km":30}'
-```
+*Nota: Ao rodar os testes via `mvn test`, o Spring ativará automaticamente o perfil `test`, utilizando o **H2 In-memory**.*
 
 ---
 
@@ -244,24 +228,16 @@ O `FlightPredictionService` realiza transformações críticas entre formatos:
 | `distanciaKm: 450`   | `distance: 279.6`  | Conversão KM → Milhas (×0.621371) |
 | `dataPartida: 14:30` | `crsDepTime: 1430` | Formato HHMM do modelo            |
 
-### 4. Preparação para Concept Drift
-
-O campo `metricas_internas` na resposta permite ao time de Data Science monitorar a performance do modelo em produção:
-
-- **`risco_historico_origem`**: Baseline de atrasos do aeroporto
-- **`risco_historico_companhia`**: Baseline de atrasos da companhia
-- **`fonte`**: Versionamento do modelo para A/B testing
-
-Esta arquitetura permite identificar degradação do modelo sem modificar o front-end.
-
 ---
 
 ## 🛣️ Roadmap (Próximos Passos)
 
 ### Curto Prazo (v1.1)
 
-- [ ] **Cache com Redis**: Implementar cache para rotas frequentes (ex: GRU→GIG), reduzindo latência em ~80%
-- [ ] **Circuit Breaker**: Adicionar Resilience4j para fallback gracioso quando a API Python estiver indisponível
+- [x] **Persistência de Histórico**: Armazenamento de predições no Postgres.
+- [x] **Testes Automatizados**: JUnit 5, Mockito e H2 Integration.
+- [ ] **Cache L1**: Redis para consultas idênticas em curto intervalo.
+- [ ] **Circuit Breaker**: Resilience4j para fallback do serviço de ML.
 
 ### Médio Prazo (v2.0)
 
@@ -272,50 +248,6 @@ Esta arquitetura permite identificar degradação do modelo sem modificar o fron
 
 - [ ] **Arquitetura Assíncrona (Kafka)**: Persistência de logs de predição sem impactar latência da API
 - [ ] **Multi-modelo**: Suporte a múltiplos modelos (Random Forest, XGBoost, Neural Network) com routing inteligente
-
----
-
-## 📁 Estrutura do Projeto
-
-```
-src/main/java/com/flightontime/flightontime/
-├── api/
-│   ├── controller/          # Endpoints REST
-│   │   └── PredictController.java
-│   ├── dto/
-│   │   ├── request/         # DTOs de entrada
-│   │   │   ├── PredictionRequest.java
-│   │   │   └── DataScienceRequest.java
-│   │   └── response/        # DTOs de saída
-│   │       ├── PredictionResponse.java
-│   │       └── DataScienceResponse.java
-│   └── validation/          # Validadores customizados
-├── client/
-│   └── RestTemplateConfig.java   # Configuração HTTP Client
-├── config/                  # Configurações Spring
-├── domain/
-│   ├── service/             # Lógica de negócio
-│   │   └── FlightPredictionService.java
-│   ├── model/               # Entidades (preparado para persistência)
-│   └── repository/          # Repositórios JPA
-└── FlightontimeApplication.java  # Classe principal
-```
-
----
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie sua feature branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'feat: adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
-
----
-
-## 📝 Licença
-
-Este projeto foi desenvolvido para o Hackathon FlightOnTime.
 
 ---
 

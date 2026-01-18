@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/v1") // Ajustado conforme contrato
@@ -39,7 +41,10 @@ public class PredictController {
     }
     
     @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("FlightOnTime API (MVP Backend) - Online ✈️");
+    public ResponseEntity<Map<String, Object>> health() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", "UP");
+        body.put("message", "FlightOnTime API (MVP Backend) - Online");
+        return ResponseEntity.ok(body);
     }
 }
